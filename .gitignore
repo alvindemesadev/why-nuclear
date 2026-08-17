@@ -22,6 +22,14 @@ pnpm-debug.log*
 # Freebuff desktop local data
 .freebuff/
 
+# Lighthouse audit artifacts (perf/CWV runs, traces, reports)
+lh-*.json
+
+# ad-hoc analysis / debug scripts
+probe-credits.cjs
+scan-spacing.mjs
+scripts/diag-cls.mjs
+
 # macOS-specific files
 .DS_Store
 
