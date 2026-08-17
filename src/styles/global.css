@@ -1673,6 +1673,14 @@ section {
   font-optical-sizing: auto;
 }
 
+.sources .sources-note {
+  max-width: 52rem;
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
 .sources ul {
   list-style: none;
   margin: 0 0 2rem;

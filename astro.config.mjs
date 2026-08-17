@@ -17,6 +17,11 @@ export default defineConfig({
     // Single page, ~8KB of CSS: inline it to remove a render-blocking request.
     inlineStylesheets: 'always',
   },
+  server: {
+    // Allow Cloudflare quick tunnels (https://*.trycloudflare.com) to reach
+    // the dev server; otherwise Vite rejects their Host header with a 403.
+    allowedHosts: ['.trycloudflare.com'],
+  },
   integrations: [
     sitemap({
       // Static content site: pages change rarely, so signal that with a
