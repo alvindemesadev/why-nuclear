@@ -1,0 +1,1992 @@
+/* ============ Design tokens ============ */
+:root {
+  color-scheme: dark;
+  /* Enables height transitions between a length and `auto` (used by the FAQ
+     accordion). Chromium 129+; other engines ignore it and the FAQ falls back
+     to instant open/close — safe progressive enhancement. */
+  interpolate-size: allow-keywords;
+
+  --bg: #0a0e13;
+  --bg-soft: #0f151c;
+  --card: #121a23;
+  --line: #22303c;
+  --text: #e7edf3;
+  --muted: #97a5b2;
+  --accent: #ffc53d;
+  --accent-ink: #211703;
+  --teal: #2dd4bf;
+
+  /* Derived tokens: text-safe accent, nav backdrop, display gradients, body copy */
+  --accent-text: var(--accent);
+  --nav-bg: #0a0e13;
+  --grad-a: var(--accent);
+  --grad-b: var(--teal);
+  --arg-text: #c6d0d9;
+
+  /* Custom scrollbar colors (per-theme) */
+  --scrollbar-thumb: #2c3d4c;
+  --scrollbar-thumb-hover: #3e5468;
+
+  /* Myth label (rose) — soft enough to sit beside the amber fact label */
+  --myth-text: #f2a9a9;
+  --myth-bg: rgba(242, 169, 169, 0.07);
+
+  --maxw: 1080px;
+  --radius: 14px;
+  --nav-h: 64px;
+
+  --font-display: "Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Manrope Variable", "Manrope", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono",
+    Menlo, Consolas, monospace;
+}
+
+/* ============ Base ============ */
+* {
+  box-sizing: border-box;
+}
+
+/* Custom scrollbar: thin, rounded, theme-aware. Covers the page and every
+   internal scroll container (e.g. the mobile menu panel). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  /* Inset look: transparent border with background-clip so the thumb never
+     touches the viewport edge */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--text);
+  /* Ambient amber light behind the hero. The ellipse's center sits above the
+     page (at 50% -15%), so its peak is off-canvas and the visible area is a
+     smooth fade — no full-strength line along the top edge (same principle as
+     the CTA card glow). */
+  background:
+    radial-gradient(70% 45% at 50% -15%, rgba(255, 197, 61, 0.07), transparent 70%),
+    var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* Interactive elements always get a pointer cursor, whatever their element */
+:where(a, button, summary, label[for], [role="button"], [role="switch"]) {
+  cursor: pointer;
+}
+
+a {
+  color: var(--teal);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.18s ease;
+}
+
+a:hover {
+  color: var(--accent-text);
+}
+
+img {
+  max-width: 100%;
+}
+
+/* Balanced wrapping: no orphaned words on headings or awkward breaks in body */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* ============ Accessibility ============ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============ Layout ============ */
+.container {
+  width: min(var(--maxw), 100% - 2.5rem);
+  margin-inline: auto;
+}
+
+main {
+  scroll-margin-top: var(--nav-h);
+}
+
+section {
+  padding: clamp(4rem, 9vw, 6.5rem) 0;
+  scroll-margin-top: var(--nav-h);
+}
+
+/* ============ Nav ============ */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+  /* Solid, opaque background: no backdrop-filter (it creates a containing
+     block for the mobile menu's `position: fixed` panel in WebKit, collapsing
+     it to the header's height instead of the viewport). */
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.brand svg {
+  width: 24px;
+  height: 24px;
+}
+
+.brand:hover {
+  color: var(--accent-text);
+}
+
+.nav-links {
+  display: flex;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.35rem 0.1rem;
+  position: relative;
+}
+
+/* Sliding underline: grows from the left on hover and while active */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--text);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  transform: scaleX(1);
+}
+
+/* ============ Mobile menu (checkbox + label, zero-JS) ============ */
+.nav-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.nav-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.nav-burger svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-burger:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.06);
+}
+
+.nav-burger .burger-close {
+  display: none;
+}
+
+.nav-toggle:checked ~ .nav-burger .burger-open {
+  display: none;
+}
+
+.nav-toggle:checked ~ .nav-burger .burger-close {
+  display: block;
+}
+
+.nav-toggle:focus-visible ~ .nav-burger {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Theme toggle: shows the icon of the theme you'd switch to */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.theme-toggle .ic {
+  width: 20px;
+  height: 20px;
+}
+
+.theme-toggle .ic-moon {
+  display: none;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.06);
+}
+
+:root[data-theme="light"] .theme-toggle .ic-moon {
+  display: block;
+}
+
+:root[data-theme="light"] .theme-toggle .ic-sun {
+  display: none;
+}
+
+@media (max-width: 1012px) {
+  /* Nav switches to the burger below 1012px: with nine short links plus the
+     theme toggle, the row still fits down to ~1010px on the tightest page
+     (measured: home/credits fit to ~960px, the deep-dive nav to ~1009px, so
+     1012px keeps a margin on the tightest page). The content layout keeps
+     its own 860px breakpoint below. */
+  .nav {
+    /* Tighter gap between the grouped burger + theme toggle on mobile */
+    gap: 0.5rem;
+  }
+
+  .nav-burger {
+    display: inline-flex;
+    /* Render the burger after the theme toggle (flex order beats DOM order)
+       so the burger is the rightmost element. The auto margin on the toggle
+       below pushes this grouped pair to the right edge. */
+    order: 1;
+  }
+
+  .theme-toggle {
+    /* Absorb the free space between brand and the button pair, keeping them
+       grouped at the right edge with the burger outermost. */
+    margin-left: auto;
+  }
+
+  /* Lock background scroll while the menu is open */
+  body:has(.nav-toggle:checked) {
+    overflow: hidden;
+  }
+
+  .nav-panel {
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: safe center;
+    overflow-y: auto;
+    /* No padding on the animated element: with box-sizing: border-box,
+       `block-size: 0` still reserves the padding, so the panel would never
+       collapse below the padding height. The padding lives on .nav-links. */
+    background: var(--bg);
+    /* Collapsed to zero; grows to the open height below: a curtain-drop
+       open, a roll-up close. An explicit calc() rather than `auto` so the
+       length <-> length transition works in every engine — Chrome's
+       interpolate-size interpolation from 0 to auto stalls on open.
+       `interpolate-size` stays enabled on :root for the FAQ accordion. */
+    block-size: 0;
+    opacity: 0;
+    visibility: hidden;
+    /* Same easing curve as the rest of the site. The visibility delay flips
+       it only after the fade-out completes: closing keeps its full fade,
+       opening responds instantly (no dead time on tap). */
+    transition:
+      block-size 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.3s;
+  }
+
+  .nav-toggle:checked ~ .nav-panel {
+    block-size: calc(100svh - var(--nav-h));
+    opacity: 1;
+    visibility: visible;
+    transition:
+      block-size 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0s;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    /* The panel's former padding, moved here so the animating element stays
+       clean (see .nav-panel) */
+    padding: clamp(1.5rem, 7vw, 3rem) 2rem 2rem;
+  }
+
+  .nav-links a {
+    display: block;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-bottom: none;
+    border-radius: 10px;
+  }
+
+  .nav-links a::after {
+    /* The sliding underline is a desktop pattern; rows use a bg highlight */
+    display: none;
+  }
+
+  .nav-links a:hover {
+    background: var(--bg-soft);
+  }
+
+  .nav-links a.active {
+    background: var(--bg-soft);
+    color: var(--text);
+    border-bottom: none;
+  }
+}
+
+/* ============ Hero ============ */
+.hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: calc(100svh - var(--nav-h));
+  text-align: center;
+  padding: clamp(4rem, 10vw, 7rem) 0;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 19, 0.62) 0%,
+    rgba(10, 14, 19, 0.38) 45%,
+    var(--bg) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  margin-bottom: 1.5rem;
+}
+
+.hero h1 {
+  margin: 0 auto 1.25rem;
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.7rem, 7vw, 4.8rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  font-weight: 620;
+  font-optical-sizing: auto;
+}
+
+.hero h1 .accent {
+  background: linear-gradient(100deg, var(--grad-a), var(--grad-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero p:not(.hero-eyebrow) {
+  max-width: 58ch;
+  margin: 0 auto 2.25rem;
+  /* Dedicated over-photo tone: near-white in dark, with a tight scrim shadow
+     that darkens the area right around the glyphs so the subtitle stays
+     readable against the lighter hero photo. */
+  color: #e2e9f0;
+  text-shadow:
+    0 1px 2px rgba(10, 14, 19, 0.72),
+    0 3px 12px rgba(10, 14, 19, 0.45);
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+/* Both buttons in a pair (hero and CTA share .hero-actions) get the same
+   width so the two rows read as the same component. 15rem is wider than
+   any label, so the pair is equal-width on desktop and stacks centered
+   on mobile. */
+.hero-actions .btn {
+  min-width: 15rem;
+  justify-content: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn .ic {
+  width: 1.05em;
+  height: 1.05em;
+  flex: none;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 6px 24px rgba(255, 197, 61, 0.25);
+}
+
+.btn-primary:hover {
+  color: var(--accent-ink);
+  box-shadow: 0 10px 32px rgba(255, 197, 61, 0.35);
+}
+
+.btn-ghost {
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.btn-light {
+  background: #ffffff;
+  border: none;
+  color: #0e141b;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+}
+
+.btn-light:hover {
+  background: #ffffff;
+  color: #0e141b;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+}
+
+/* ============ Hero bento stats ============ */
+.hero-stats {
+  margin: 3rem auto 0;
+  max-width: 640px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  text-align: left;
+}
+
+.hs-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem 1.35rem;
+  background: rgba(18, 26, 35, 0.72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.hs-tile.hs-wide {
+  grid-column: span 2;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.9rem;
+  padding-right: 3.25rem; /* keep the row clear of the right-pinned icon */
+}
+
+/* Icon pinned to the card's top-right corner, same as the section stat
+   cards; on the single-line wide tiles it sits vertically centered on the
+   right edge instead. */
+.hs-tile .ic {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: 22px;
+  height: 22px;
+  color: var(--accent-text);
+  flex: none;
+}
+
+.hs-tile.hs-wide .ic {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hs-num {
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 3.5vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--accent-text);
+  white-space: nowrap;
+}
+
+.hs-label {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 480px) {
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+  /* One card per line, stacked and centered: icon on top, then the value,
+     then the label — all aligned to the center. */
+  .hs-tile,
+  .hs-tile.hs-wide {
+    grid-column: span 1;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.3rem;
+    padding-right: 1.35rem; /* reset the wide tile's right-pinned icon padding */
+  }
+  .hs-tile .ic,
+  .hs-tile.hs-wide .ic {
+    position: static;
+    top: auto;
+    right: auto;
+    transform: none;
+    margin: 0;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero h1 {
+    font-size: 2.35rem;
+  }
+}
+
+/* ============ Final CTA band ============ */
+/* ============ Philippines deep-dive teaser ============ */
+.ph-teaser {
+  padding: clamp(2.5rem, 6vw, 4rem) 0 0;
+}
+
+.ph-teaser-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 2.5rem;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.ph-teaser-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    55% 130% at 88% 0%,
+    rgba(255, 197, 61, 0.1),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.ph-teaser-body {
+  position: relative;
+  max-width: 40rem;
+  min-width: min(100%, 22rem);
+}
+
+.ph-teaser-body .section-num {
+  margin-bottom: 0.6rem;
+}
+
+.ph-teaser-body h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  font-weight: 620;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.6rem;
+  text-wrap: balance;
+}
+
+.ph-teaser-body p:not(.section-num) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.ph-teaser-card .btn {
+  position: relative;
+  flex: none;
+}
+
+.cta {
+  padding: clamp(3rem, 7vw, 5rem) 0;
+}
+
+.cta-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) * 1.5);
+  padding: clamp(2.75rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 3.5rem);
+  text-align: center;
+}
+
+.cta-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* The ellipse's center sits below the card (clipped by overflow: hidden), so
+     the visible area is a smooth fade that never gets cut mid-gradient — no
+     hard edge. */
+  background: radial-gradient(
+    70% 110% at 50% 118%,
+    rgba(255, 197, 61, 0.16),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.cta-card > * {
+  position: relative;
+}
+
+.cta-card h2 {
+  margin: 0 auto 1rem;
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+
+.cta-card p {
+  max-width: 52ch;
+  margin: 0 auto 2rem;
+  color: var(--muted);
+}
+
+/* ============ Scroll-driven section reveals ============ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .section-head,
+  .arg,
+  .myths,
+  .faq,
+  .ph-teaser-card,
+  .cta-card {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+}@media (prefers-reduced-motion: reduce) {
+  .section-head,
+  .arg,
+  .myths,
+  .faq,
+  .ph-teaser-card,
+  .cta-card {
+    animation: none;
+  }
+  .faq-item::details-content {
+    transition: none;
+  }
+}
+
+@media print {
+  .section-head,
+  .arg,
+  .myths,
+  .faq,
+  .cta-card {
+    animation: none;
+  }
+}
+
+/* ============ Section heads ============ */
+.section-head {
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  max-width: 46rem;
+}
+
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  color: var(--accent-text);
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+}
+
+.section-head h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+
+.section-head p:not(.section-num) {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+/* ============ Argument grid ============ */
+.arg {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .arg {
+    grid-template-columns: 1fr;
+  }
+}
+
+.arg-copy p {
+  margin: 0 0 1rem;
+  color: var(--arg-text);
+}
+
+.arg-copy .lead {
+  color: var(--text);
+  font-size: 1.15rem;
+}
+
+.arg-copy a {
+  color: var(--accent-text);
+}
+
+.source {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* ============ Stat callout ============ */
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin: 1.75rem 0;
+  padding: 1.5rem 1.75rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  position: relative;
+}
+
+/* Icon lives in the card's top-right corner; the body clears it so a long
+   number (e.g. "1 football field, ~10 yards deep") never runs underneath. */
+.stat .ic {
+  position: absolute;
+  top: 1.3rem;
+  right: 1.3rem;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  color: var(--accent-text);
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  padding-right: 2.75rem;
+}
+
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(100deg, var(--grad-a), var(--grad-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ============ Charts ============ */
+.chart {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+}
+
+.chart h3 {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) 4.5rem;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+@media (max-width: 400px) {
+  .chart-row {
+    grid-template-columns: 4.25rem minmax(0, 1fr) 3.25rem;
+    gap: 0.5rem;
+  }
+  .chart {
+    padding: 1.1rem 1rem;
+  }
+  .chart-label {
+    font-size: 0.8rem;
+  }
+  .chart-value {
+    font-size: 0.78rem;
+  }
+}
+
+.chart-row:last-child {
+  margin-bottom: 0;
+}
+
+.chart-label {
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.chart-track {
+  height: 14px;
+  background: var(--bg-soft);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.chart-bar {
+  --bar: #3a4855;
+  display: block;
+  height: 100%;
+  width: var(--w, 0%);
+  min-width: 3px;
+  border-radius: 999px;
+  background: var(--bar);
+  transform-origin: left center;
+  transition: width 0.25s ease;
+  animation: bar-grow 0.8s cubic-bezier(0.25, 0.6, 0.25, 1) both;
+}
+
+/* The row we're making the case for: solid amber, everything else muted */
+.chart-bar--hl {
+  --bar: var(--accent);
+}
+
+.chart-bar.bar-tiny {
+  min-width: 4px;
+}
+
+.chart-row:nth-of-type(1) .chart-bar {
+  animation-delay: 0.05s;
+}
+.chart-row:nth-of-type(2) .chart-bar {
+  animation-delay: 0.12s;
+}
+.chart-row:nth-of-type(3) .chart-bar {
+  animation-delay: 0.19s;
+}
+.chart-row:nth-of-type(4) .chart-bar {
+  animation-delay: 0.26s;
+}
+.chart-row:nth-of-type(5) .chart-bar {
+  animation-delay: 0.33s;
+}
+.chart-row:nth-of-type(6) .chart-bar {
+  animation-delay: 0.4s;
+}
+.chart-row:nth-of-type(7) .chart-bar {
+  animation-delay: 0.47s;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.chart-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.chart-note {
+  margin: 1.1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ============ Log-scale toggle (deaths chart) ============ */
+.chart--log .chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.chart--log .chart-head h3 {
+  margin: 0;
+}
+
+/* Visually hidden but focusable checkbox (same pattern as the nav menu toggle) */
+.log-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.log-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  user-select: none;
+  transition: color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.log-toggle-btn:hover {
+  color: var(--accent-text);
+}
+
+.log-toggle-ui {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.log-toggle-ui::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.log-toggle:checked ~ .chart-head .log-toggle-btn {
+  color: var(--accent-text);
+}
+
+.log-toggle:checked ~ .chart-head .log-toggle-ui {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.log-toggle:checked ~ .chart-head .log-toggle-ui::after {
+  transform: translateX(16px);
+  background: var(--accent-ink);
+}
+
+.log-toggle:focus-visible ~ .chart-head .log-toggle-ui {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Linear widths (default) */
+.chart--log .w-coal {
+  --w: 100%;
+}
+.chart--log .w-oil {
+  --w: 75%;
+}
+.chart--log .w-biomass {
+  --w: 19%;
+}
+.chart--log .w-gas {
+  --w: 11%;
+}
+.chart--log .w-hydro {
+  --w: 5%;
+}
+.chart--log .w-wind {
+  --w: 0.1%;
+}
+.chart--log .w-nuclear {
+  --w: 0.1%;
+}
+
+/* Log widths: axis 0.01 -> 100 deaths/TWh, bar = (log10(v) + 2) / 4 of the track */
+.log-toggle:checked ~ .chart-rows .w-coal {
+  --w: 84.8%;
+}
+.log-toggle:checked ~ .chart-rows .w-oil {
+  --w: 81.6%;
+}
+.log-toggle:checked ~ .chart-rows .w-biomass {
+  --w: 66.6%;
+}
+.log-toggle:checked ~ .chart-rows .w-gas {
+  --w: 61.3%;
+}
+.log-toggle:checked ~ .chart-rows .w-hydro {
+  --w: 52.9%;
+}
+.log-toggle:checked ~ .chart-rows .w-wind {
+  --w: 13.6%;
+}
+.log-toggle:checked ~ .chart-rows .w-nuclear {
+  --w: 11.9%;
+}
+
+/* Decade ruler, shown only in log mode */
+.chart--log .chart-scale {
+  display: none;
+  margin-top: 0.9rem;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.log-toggle:checked ~ .chart-scale {
+  display: flex;
+}
+
+/* Notes swap with the toggle */
+.chart-note--log {
+  display: none;
+}
+
+.log-toggle:checked ~ .chart-note--linear {
+  display: none;
+}
+
+.log-toggle:checked ~ .chart-note--log {
+  display: block;
+}
+
+/* ============ Stats marquee ============ */
+.marquee {
+  position: relative;
+  border-block: 1px solid var(--line);
+  background: var(--bg-soft);
+  padding-block: 1.15rem;
+}
+
+.marquee-viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-scroll 38s linear infinite;
+}
+
+.marquee-group {
+  display: flex;
+  align-items: center;
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  padding-right: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  white-space: nowrap;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
+.marquee-item::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+
+.marquee-item strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause on hover or keyboard focus */
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* ============ Photos ============ */
+.arg-media {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.photo {
+  margin: 0;
+}
+
+.photo img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  display: block;
+}
+
+.photo figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Inline photo credits: the small mono line under every figure (and the
+   hero) so images are visibly sourced on the page, not only on /credits/. */
+.photo figcaption .photo-credit {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+/* Hero photo credit: tiny mono line with the same over-photo legibility
+   treatment as the hero subtitle (near-white in dark, slate on light).
+   The .hero-content p prefix wins the tie against .hero p:not(.hero-eyebrow)
+   (which would otherwise style it as a full-size subtitle) — same
+   specificity, later in the cascade. */
+.hero-content p.hero-credit {
+  margin: 1.5rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: #c6d0d9;
+  text-shadow: 0 1px 2px rgba(10, 14, 19, 0.72);
+}
+
+.hero-content p.hero-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.hero-content p.hero-credit a:hover {
+  color: #ffffff;
+}
+
+:root[data-theme="light"] .hero-content p.hero-credit {
+  color: #4a5766;
+  text-shadow: 0 1px 2px rgba(250, 246, 239, 0.55);
+}
+
+:root[data-theme="light"] .hero-content p.hero-credit a:hover {
+  color: var(--accent-text);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .hero-content p.hero-credit {
+    color: #4a5766;
+    text-shadow: 0 1px 2px rgba(250, 246, 239, 0.55);
+  }
+
+  :root:not([data-theme]) .hero-content p.hero-credit a:hover {
+    color: var(--accent-text);
+  }
+}
+
+.photo-crop img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ============ Plain list (honest section) ============ */
+.plain {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  display: grid;
+  gap: 1.15rem;
+}
+
+.plain li {
+  padding-left: 1.4rem;
+  position: relative;
+  color: var(--arg-text);
+}
+
+.plain li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+}
+
+.plain li strong {
+  color: var(--text);
+}
+
+/* ============ FAQ ============ */
+.faq {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.faq-item {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Smooth open/close: animate the content wrapper's height from 0 to auto.
+   `::details-content` is Baseline 2025 (Chrome 131+, Firefox 143+, Safari
+   18.4+); the interpolation itself needs `interpolate-size` (Chromium 129+),
+   so other engines snap open/closed — the pre-animation behavior. */
+.faq-item::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  /* Closed details content is `content-visibility: hidden` by the UA, which
+     prevents the height from animating out of an unrendered state. Opt in
+     explicitly and transition it with allow-discrete so the reveal animates. */
+  content-visibility: hidden;
+  transition:
+    block-size 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    content-visibility 0.32s allow-discrete;
+}
+
+.faq-item[open]::details-content {
+  block-size: auto;
+  content-visibility: visible;
+}
+
+.faq-item[open] {
+  border-color: rgba(255, 197, 61, 0.45);
+}
+
+.faq-item summary {
+  padding: 1.05rem 1.3rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.05rem;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Hover highlight fills the row; corners follow the card state */
+.faq-item:not([open]) summary {
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.faq-item[open] summary {
+  border-radius: calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0 0;
+}
+
+.faq-item summary:hover {
+  background: var(--bg-soft);
+  color: var(--accent-text);
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+
+.faq-item .faq-chev {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--accent-text);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq-item[open] .faq-chev {
+  transform: rotate(180deg);
+}
+
+.faq-body {
+  padding: 0 1.3rem 1.15rem;
+  color: var(--muted);
+}
+
+.faq-body p {
+  margin: 0;
+}
+
+/* ============ Myths vs Facts ============ */
+.myths {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.myth-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.myth-panel,
+.fact-panel {
+  padding: 1.2rem 1.4rem 1.3rem;
+}
+
+.myth-panel {
+  background: var(--myth-bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.myth-tag,
+.fact-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.myth-tag {
+  color: var(--myth-text);
+}
+
+.fact-tag {
+  color: var(--accent-text);
+}
+
+.myth-tag .ic,
+.fact-tag .ic {
+  width: 0.95em;
+  height: 0.95em;
+}
+
+.myth-claim {
+  margin: 0;
+  font-style: italic;
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.fact-panel p:not(.fact-tag) {
+  margin: 0 0 0.75rem;
+  color: var(--arg-text);
+}
+
+.fact-panel .source {
+  margin-top: 0;
+}
+
+.fact-panel .source a {
+  color: var(--accent-text);
+}
+
+@media (width <= 860px) {
+  .myths {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============ Footer / sources ============ */
+.sources {
+  border-top: 1px solid var(--line);
+  padding: clamp(3rem, 7vw, 5rem) 0;
+}
+
+.sources h2 {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+
+.sources ul {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+  max-width: 52rem;
+}
+
+.sources li a {
+  color: var(--text);
+  text-decoration: none;
+  /* Underline grows from the left on hover */
+  background-image: linear-gradient(var(--accent-text), var(--accent-text));
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: color 0.18s ease, background-size 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sources li a:hover {
+  color: var(--accent-text);
+  background-size: 100% 2px;
+}
+
+.sources li a .ic {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: -0.12em;
+  margin-left: 0.35em;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+.sources li a:hover .ic {
+  color: var(--accent-text);
+}
+
+.sources .meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  justify-content: space-between;
+}
+
+/* ============ Site footer ============
+   A doormat footer: brand + one-liner, a mirror of the argument sections,
+   and resources. Same on every page so it works as a navigation safety net
+   (NN/g: footers rescue users who scroll to the end without finding what
+   they need). */
+.site-footer {
+  background: var(--bg-soft);
+  border-top: 1px solid var(--line);
+  padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.footer-brand .brand {
+  font-size: 1.1rem;
+}
+
+.footer-brand p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 34ch;
+  margin: 0.9rem 0 0;
+}
+
+.footer-col h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.footer-col a {
+  color: var(--muted);
+  text-decoration: none;
+  display: inline-block;
+  padding: 0.6rem 0.1rem;
+  font-size: 0.98rem;
+  /* Underline grows from the left on hover */
+  background-image: linear-gradient(var(--accent-text), var(--accent-text));
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: color 0.18s ease, background-size 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-col a:hover {
+  color: var(--text);
+  background-size: 100% 2px;
+}
+
+.footer-bottom {
+  color: var(--muted);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+  margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  padding-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  justify-content: space-between;
+}
+
+.footer-bottom a {
+  color: var(--muted);
+}
+
+.footer-bottom a:hover {
+  color: var(--accent-text);
+}
+
+@media (width <= 700px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.credits-title {
+  margin-top: 2.5rem;
+}
+
+.credits {
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+}
+
+.credits p {
+  margin: 0 0 0.75rem;
+}
+
+.credits ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.credits a {
+  color: var(--accent-text);
+}
+
+/* ============ Light theme ============
+   Placed last so its overrides beat the base rules above.
+
+   Two entry points, same values (kept in sync by hand):
+     1. `:root[data-theme="light"]` — a manual choice (nav sun/moon toggle).
+     2. The prefers-color-scheme block below — the no-JS fallback, applied only
+        when no explicit choice exists.
+   The warm paper palette is identical in both; the amber accent and chart bars
+   stay the same in dark and light. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Warm paper palette; the amber accent and chart bars stay identical */
+  --bg: #faf6ef;
+  --bg-soft: #f1eae0;
+  --card: #ffffff;
+  --line: #e2d8c8;
+  --text: #232b36;
+  --muted: #5b6a79;
+  --teal: #115e59;
+  --accent-text: #8a5a00;
+  --nav-bg: #faf6ef;
+  --grad-a: #b45309;
+  --grad-b: #0f766e;
+  --arg-text: #45525f;
+  --scrollbar-thumb: #cfc3ae;
+  --scrollbar-thumb-hover: #b0a18a;
+  --myth-text: #a63d32;
+  --myth-bg: rgba(166, 61, 50, 0.06);
+}
+
+/* Photo scrims and glass that are hard-coded for the dark hero */
+:root[data-theme="light"] .hero-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(250, 246, 239, 0.7) 0%,
+    rgba(250, 246, 239, 0.45) 45%,
+    var(--bg) 100%
+  );
+}
+
+:root[data-theme="light"] .hero p:not(.hero-eyebrow) {
+  color: #33404c;
+  text-shadow: 0 1px 2px rgba(250, 246, 239, 0.55);
+}
+
+:root[data-theme="light"] .hs-tile {
+  /* Solid card, same as every other card in light mode — no photo bleed
+     through, and the border reads instead of vanishing on the paper. */
+  background: var(--card);
+}
+
+:root[data-theme="light"] .faq-item[open] {
+  border-color: rgba(255, 197, 61, 0.8);
+}
+
+:root[data-theme="light"] .cta-card::before {
+  background: radial-gradient(
+    70% 110% at 50% 118%,
+    rgba(255, 197, 61, 0.13),
+    transparent 60%
+  );
+}
+
+/* The white secondary button is for the dark hero/CTA; on light paper it
+   becomes the dark palette's navy blue — the same #121a23 / #0a0e13 tones
+   the dark theme uses for its cards and page background — so it reads as a
+   solid "dark blue" button against both the paper hero and the white CTA
+   card. */
+
+@media (prefers-color-scheme: light) {
+  /* No-JS fallback: apply light only when there's no explicit choice */
+  :root:not([data-theme]) {
+    color-scheme: light;
+
+    --bg: #faf6ef;
+    --bg-soft: #f1eae0;
+    --card: #ffffff;
+    --line: #e2d8c8;
+    --text: #232b36;
+    --muted: #5b6a79;
+    --teal: #115e59;
+    --accent-text: #8a5a00;
+    --nav-bg: #faf6ef;
+    --grad-a: #b45309;
+    --grad-b: #0f766e;
+    --arg-text: #45525f;
+    --scrollbar-thumb: #cfc3ae;
+    --scrollbar-thumb-hover: #b0a18a;
+    --myth-text: #a63d32;
+    --myth-bg: rgba(166, 61, 50, 0.06);
+  }
+
+  :root:not([data-theme]) .hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(250, 246, 239, 0.7) 0%,
+      rgba(250, 246, 239, 0.45) 45%,
+      var(--bg) 100%
+    );
+  }
+
+  :root:not([data-theme]) .hero p:not(.hero-eyebrow) {
+    color: #33404c;
+    text-shadow: 0 1px 2px rgba(250, 246, 239, 0.55);
+  }
+
+  :root:not([data-theme]) .hs-tile {
+    /* Solid card, same as every other card in light mode — no photo bleed
+       through, and the border reads instead of vanishing on the paper. */
+    background: var(--card);
+  }
+
+  :root:not([data-theme]) .faq-item[open] {
+    border-color: rgba(255, 197, 61, 0.8);
+  }
+
+  :root:not([data-theme]) .cta-card::before {
+    background: radial-gradient(
+      70% 110% at 50% 118%,
+      rgba(255, 197, 61, 0.13),
+      transparent 60%
+    );
+  }
+}
+
+/* Hover motion off under reduced motion (transforms and animated underlines) */
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover,
+  .btn:active,
+  .nav-burger:hover,
+  .theme-toggle:hover {
+    transform: none;
+  }
+
+  .nav-links a::after,
+  .sources li a,
+  .footer-col a,
+  .faq-item summary,
+  .brand,
+  a,
+  .log-toggle-btn {
+    transition: none;
+  }
+
+  .nav-panel {
+    transition: none;
+  }
+}

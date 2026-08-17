@@ -1,0 +1,1531 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/manrope";
+import "../styles/global.css";
+
+// The latin subset woff2 files the @fontsource CSS actually serves. Preloading
+// them makes the first layout use the webfonts directly, so font-display: swap
+// never re-lays-out the page after first paint — that swap is what showed up as
+// CLS in Lighthouse's mobile-emulation trace.
+import frauncesWoff from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2";
+import manropeWoff from "@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2";
+
+import gravelines from "../assets/img/gravelines.jpg";
+import wind from "../assets/img/wind.jpg";
+import pellets from "../assets/img/pellets.jpg";
+import solar from "../assets/img/solar.jpg";
+import controlRoom from "../assets/img/control-room.jpg";
+import diablo from "../assets/img/diablo.jpg";
+import pelletHand from "../assets/img/pellet-hand.jpg";
+import cofrentes from "../assets/img/cofrentes.jpg";
+import tmi from "../assets/img/tmi.jpg";
+
+const siteTitle = "Why Nuclear: clean, reliable, dense power";
+const siteDescription =
+  "A data-driven case for nuclear energy: carbon-free electricity, a tiny land footprint, power that runs around the clock, and the safest track record of any major source.";
+
+// Schema.org structured data so search engines treat the article as a
+// first-class entity: headline, description, share image, and publisher.
+// Same shape as the deep-dive page's Article markup.
+const articleJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: siteTitle,
+  description: siteDescription,
+  image: new URL("/og-image.jpg", Astro.site).href,
+  url: new URL("/", Astro.site).href,
+  inLanguage: "en",
+  mainEntityOfPage: new URL("/", Astro.site).href,
+  author: {
+    "@type": "Organization",
+    name: "Why Nuclear",
+    url: new URL("/", Astro.site).href,
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Why Nuclear",
+    url: new URL("/", Astro.site).href,
+    logo: {
+      "@type": "ImageObject",
+      url: new URL("/favicon.svg", Astro.site).href,
+    },
+  },
+});
+
+const heroWidths = [640, 960, 1280, 1920];
+const colWidths = [480, 720];
+const img = {
+  alt: "",
+  loading: "lazy" as const,
+  decoding: "async" as const,
+  sizes: "(max-width: 860px) 100vw, 50vw",
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={frauncesWoff} />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={manropeWoff} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{siteTitle}</title>
+    <meta name="description" content={siteDescription} />
+    <link rel="canonical" href={new URL("/", Astro.site).href} />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={siteDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Why Nuclear" />
+    <meta property="og:url" content={new URL("/", Astro.site).href} />
+    <meta
+      property="og:image"
+      content={new URL("/og-image.jpg", Astro.site).href}
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta
+      property="og:image:alt"
+      content="The Gravelines nuclear power station on the French coast, with the headline: the cleanest, safest, most reliable energy we already know how to build"
+    />
+    <script type="application/ld+json" set:html={articleJsonLd} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={siteDescription} />
+    <meta name="twitter:image" content={new URL("/og-image.jpg", Astro.site).href} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#faf6ef" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0e13" />
+    <script is:inline>
+      // Restore the saved theme (or the OS preference) before first paint, so the
+      // page never flashes the wrong colors. With JS off, the stylesheet's
+      // prefers-color-scheme fallback handles it.
+      (function () {
+        try {
+          var theme = localStorage.getItem("theme");
+          if (theme !== "light" && theme !== "dark") {
+            theme = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          }
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <a class="brand" href="#top" aria-label="Why Nuclear, back to top">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="6" fill="#ffc53d" />
+          <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(-30 32 32)" />
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(30 32 32)" />
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(90 32 32)" />
+          </g>
+        </svg>
+        Why Nuclear
+      </a>
+      <input
+        type="checkbox"
+        id="nav-toggle"
+        class="nav-toggle"
+        role="switch"
+        aria-label="Toggle navigation menu"
+      />
+      <label for="nav-toggle" class="nav-burger" aria-hidden="true">
+        <svg class="burger-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <svg class="burger-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </label>
+      <nav aria-label="Primary" class="nav-panel">
+        <ul class="nav-links">
+          <li><a href="#climate">Climate</a></li>
+          <li><a href="#safety">Safety</a></li>
+          <li><a href="#density">Density</a></li>
+          <li><a href="#reliability">Reliability</a></li>
+          <li><a href="#waste">Waste</a></li>
+          <li><a href="#cost">Cost</a></li>
+          <li><a href="#myths">Myths</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#sources">Sources</a></li>
+        </ul>
+      </nav>
+      <button
+        id="theme-toggle"
+        class="theme-toggle"
+        type="button"
+        aria-pressed="false"
+        aria-label="Switch to light theme"
+      >
+        <Icon name="lucide:sun" class="ic ic-sun" aria-hidden="true" />
+        <Icon name="lucide:moon" class="ic ic-moon" aria-hidden="true" />
+      </button>
+    </header>
+
+    <main id="main">
+      <!-- ============ HERO ============ -->
+      <section class="hero" id="top" aria-labelledby="hero-title">
+        <Image
+          src={gravelines}
+          alt="The six reactor buildings of the Gravelines nuclear power station on the French coast, seen from the sea"
+          widths={heroWidths}
+          sizes="100vw"
+          fetchpriority="high"
+          loading="eager"
+          decoding="sync"
+          quality={75}
+          class="hero-bg"
+        />
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-content container">
+          <p class="hero-eyebrow">The evidence, plainly</p>
+          <h1 id="hero-title">
+            Nuclear is the <span class="accent">cleanest, safest, most reliable</span> energy we
+            already know how to build
+          </h1>
+          <p>
+            One reactor powers a million homes with zero carbon emissions on a plot of land you
+            could walk across in minutes. Day and night, rain or shine. Here are the numbers.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#climate">See the evidence <Icon name="lucide:arrow-down" class="ic" aria-hidden="true" /></a>
+            <a class="btn btn-light" href="#sources">Jump to the sources <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a>
+          </div>
+
+          <div class="hero-stats" aria-label="Key figures">
+            <div class="hs-tile hs-wide">
+              <Icon name="lucide:gauge" class="ic" aria-hidden="true" />
+              <span class="hs-num">~93%</span>
+              <span class="hs-label">capacity factor, highest of any source</span>
+            </div>
+            <div class="hs-tile">
+              <Icon name="lucide:leaf" class="ic" aria-hidden="true" />
+              <span class="hs-num">≈12 g</span>
+              <span class="hs-label">CO₂/kWh, lifecycle</span>
+            </div>
+            <div class="hs-tile">
+              <Icon name="lucide:heart-pulse" class="ic" aria-hidden="true" />
+              <span class="hs-num">0.03</span>
+              <span class="hs-label">deaths per TWh</span>
+            </div>
+            <div class="hs-tile hs-wide">
+              <Icon name="lucide:calendar-clock" class="ic" aria-hidden="true" />
+              <span class="hs-num">60–80+ yr</span>
+              <span class="hs-label">operating life, fuel a tiny share of the cost</span>
+            </div>
+          </div>
+          <p class="hero-credit">
+            The six reactor blocks of Gravelines, France, seen from the sea — photo: Ralf Bächle,
+            CC BY-SA 3.0. Full record on the <a href="/credits/">credits page</a>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ STATS MARQUEE ============ -->
+      <section class="marquee" aria-label="Key statistics, scrolling band">
+        <div class="marquee-viewport">
+          <div class="marquee-track">
+            <div class="marquee-group">
+              <span class="marquee-item"><strong>93%</strong> capacity factor</span>
+              <span class="marquee-item"><strong>≈12 g</strong> CO₂/kWh lifecycle</span>
+              <span class="marquee-item"><strong>0.03</strong> deaths / TWh</span>
+              <span class="marquee-item"><strong>1 pellet</strong> = 1 tonne of coal</span>
+              <span class="marquee-item"><strong>60–80+ yr</strong> operating life</span>
+              <span class="marquee-item"><strong>1,000 MW</strong> on ~1 sq mile</span>
+            </div>
+            <div class="marquee-group" aria-hidden="true">
+              <span class="marquee-item"><strong>93%</strong> capacity factor</span>
+              <span class="marquee-item"><strong>≈12 g</strong> CO₂/kWh lifecycle</span>
+              <span class="marquee-item"><strong>0.03</strong> deaths / TWh</span>
+              <span class="marquee-item"><strong>1 pellet</strong> = 1 tonne of coal</span>
+              <span class="marquee-item"><strong>60–80+ yr</strong> operating life</span>
+              <span class="marquee-item"><strong>1,000 MW</strong> on ~1 sq mile</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 01 CLIMATE ============ -->
+      <section id="climate" aria-labelledby="climate-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">01 · Climate</p>
+            <h2 id="climate-title">Carbon-free power that doesn't depend on the weather</h2>
+            <p>
+              Count the full lifecycle: mining, construction, operation, decommissioning. Nuclear
+              plants emit about as much CO₂ as wind power, and roughly one-seventieth as much as
+              coal.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:leaf" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">≈12 g CO₂/kWh</span>
+                  <span class="stat-label">lifecycle emissions, on par with wind</span>
+                </div>
+              </div>
+              <p class="lead">
+                Every kilowatt-hour has a footprint that starts before the plant opens and ends
+                long after it closes. Count all of it, and nuclear sits at roughly <strong>12 grams of CO₂ per kWh</strong>: comparable to wind, about a quarter of
+                solar, and a tiny fraction of fossil fuels.
+              </p>
+              <p>
+                The difference is what happens when the sun sets or the wind dies. Renewables drop
+                to zero; nuclear keeps delivering. France, where nuclear supplies roughly
+                two-thirds of electricity, has among the lowest carbon footprints per kilowatt-hour
+                in Europe, without relying on batteries to cover the gaps.
+              </p>
+              <p>
+                Climate targets need every zero-carbon tool. Wind and solar alone would force
+                staggering amounts of storage and backup; nuclear, which runs whenever you need it,
+                closes the gap they can't.
+              </p>
+              <span class="source">
+                Source: IPCC,
+                <a href="https://www.ipcc.ch/report/ar5/wg3/" rel="noopener noreferrer" target="_blank">
+                  AR5 Working Group III, Annex III (lifecycle GHG emissions)
+                </a>
+              </span>
+            </div>
+
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={wind}
+                  alt="Offshore wind turbines at Barrow Wind Farm in the Irish Sea"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  Wind is clean too. It only runs when the wind does.
+                  <span class="photo-credit">Photo: Muhammad Mahdi Karim, CC BY-SA 3.0</span>
+                </figcaption>
+              </figure>
+              <div class="chart" aria-label="Lifecycle CO₂ emissions per kilowatt-hour: coal 820 g, gas 490 g, solar 48 g, wind 12 g, nuclear 12 g">
+                <h3>Lifecycle CO₂, grams per kWh</h3>
+                <div class="chart-row">
+                  <span class="chart-label">Coal</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 100%"></span></div>
+                  <span class="chart-value">820 g</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Gas</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 60%"></span></div>
+                  <span class="chart-value">490 g</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Solar</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 6%"></span></div>
+                  <span class="chart-value">48 g</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Wind</span>
+                  <div class="chart-track"><span class="chart-bar bar-tiny" style="--w: 1.5%"></span></div>
+                  <span class="chart-value">12 g</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Nuclear</span>
+                  <div class="chart-track"><span class="chart-bar chart-bar--hl bar-tiny" style="--w: 1.5%"></span></div>
+                  <span class="chart-value">12 g</span>
+                </div>
+                <p class="chart-note">
+                  Amber marks nuclear. Wind and nuclear are so close to zero they barely register
+                  on this scale.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 02 SAFETY ============ -->
+      <section id="safety" aria-labelledby="safety-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">02 · Safety</p>
+            <h2 id="safety-title">The safest major energy source we have</h2>
+            <p>
+              Measure deaths per unit of electricity, including mining, transport, and the
+              accidents everyone remembers. Nuclear lands at the very bottom of the table.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:heart-pulse" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">0.03 deaths / TWh</span>
+                  <span class="stat-label">comparable to wind and solar; a tiny fraction of hydro and the fossil fuels</span>
+                </div>
+              </div>
+              <p class="lead">
+                Per terawatt-hour of electricity, nuclear causes about <strong>0.03 deaths</strong>.
+                Lower than wind, comparable to solar, and roughly 800 times safer than coal. That
+                count includes Chernobyl and Fukushima.
+              </p>
+              <p>
+                Why so safe? Nuclear plants are engineered with <strong>defense in depth</strong>:
+                multiple redundant barriers, ceramic fuel, steel cladding, a thick concrete
+                containment dome, each designed to contain a failure of the one before. Modern
+                reactors add passive safety: they shut themselves down and cool themselves with
+                gravity, with no operator action and no external power.
+              </p>
+              <p>
+                The famous accidents prove the point differently than most people assume. Chernobyl
+                used a unique Soviet design with no containment building and ran an ill-conceived
+                test; that combination cannot exist in a licensed Western plant. Fukushima was hit
+                by a tsunami far beyond anything the plant was designed to withstand. The direct
+                death toll from radiation was zero.
+              </p>
+              <span class="source">
+                Source: Our World in Data,
+                <a href="https://ourworldindata.org/safest-sources-of-energy" rel="noopener noreferrer" target="_blank">
+                  "What are the safest and cleanest sources of energy?"
+                </a>
+                (Sovacool et al. 2016; Markandya and Wilkinson 2007)
+              </span>
+            </div>
+
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={diablo}
+                  alt="The Diablo Canyon nuclear power plant on the rugged California coast"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  Diablo Canyon, California. Licensed to run safely for 80 years.
+                  <span class="photo-credit">Photo: marya (emdot), CC BY 2.0</span>
+                </figcaption>
+              </figure>
+              <div class="chart chart--log" aria-label="Deaths per terawatt-hour: coal 24.6, oil 18.4, biomass 4.6, gas 2.8, hydro 1.3, wind 0.04, nuclear 0.03">
+                <input
+                  type="checkbox"
+                  id="safety-log-toggle"
+                  class="log-toggle"
+                  role="switch"
+                  aria-label="Switch the deaths chart to a logarithmic scale"
+                />
+                <div class="chart-head">
+                  <h3>Deaths per terawatt-hour</h3>
+                  <label for="safety-log-toggle" class="log-toggle-btn">
+                    <span class="log-toggle-ui" aria-hidden="true"></span>
+                    <span>Log scale</span>
+                  </label>
+                </div>
+                <div class="chart-rows">
+                  <div class="chart-row">
+                    <span class="chart-label">Coal</span>
+                    <div class="chart-track"><span class="chart-bar w-coal"></span></div>
+                    <span class="chart-value">24.6</span>
+                  </div>
+                  <div class="chart-row">
+                    <span class="chart-label">Oil</span>
+                    <div class="chart-track"><span class="chart-bar w-oil"></span></div>
+                    <span class="chart-value">18.4</span>
+                  </div>
+                  <div class="chart-row">
+                    <span class="chart-label">Biomass</span>
+                    <div class="chart-track"><span class="chart-bar w-biomass"></span></div>
+                    <span class="chart-value">4.6</span>
+                  </div>
+                  <div class="chart-row">
+                    <span class="chart-label">Gas</span>
+                    <div class="chart-track"><span class="chart-bar w-gas"></span></div>
+                    <span class="chart-value">2.8</span>
+                  </div>
+                  <div class="chart-row">
+                    <span class="chart-label">Hydro</span>
+                    <div class="chart-track"><span class="chart-bar w-hydro"></span></div>
+                    <span class="chart-value">1.3</span>
+                  </div>
+                  <div class="chart-row">
+                    <span class="chart-label">Wind</span>
+                    <div class="chart-track"><span class="chart-bar bar-tiny w-wind"></span></div>
+                    <span class="chart-value">0.04</span>
+                  </div>
+                  <div class="chart-row">
+                    <span class="chart-label">Nuclear</span>
+                    <div class="chart-track"><span class="chart-bar chart-bar--hl bar-tiny w-nuclear"></span></div>
+                    <span class="chart-value">0.03</span>
+                  </div>
+                </div>
+                <div class="chart-scale" aria-hidden="true">
+                  <span>0.01</span><span>0.1</span><span>1</span><span>10</span><span>100</span>
+                </div>
+                <p class="chart-note chart-note--linear">
+                  Amber marks nuclear. On this linear scale wind and nuclear barely register, and
+                  even hydro looks small next to the fossil fuels. Flip the switch for a log scale.
+                </p>
+                <p class="chart-note chart-note--log">
+                  Log scale, 0.01 to 100 deaths per TWh, so the near-zero rows are no longer
+                  invisible. Amber marks nuclear.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 03 DENSITY ============ -->
+      <section id="density" aria-labelledby="density-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">03 · Density</p>
+            <h2 id="density-title">A ridiculously small footprint for a massive amount of power</h2>
+            <p>
+              Uranium is millions of times more energy-dense than coal, and the land difference
+              between nuclear and renewables is even bigger than the numbers suggest.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:flask-conical" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">1 pellet = 1 tonne of coal</span>
+                  <span class="stat-label">a 7-gram uranium fuel pellet, about the size of a gummy bear</span>
+                </div>
+              </div>
+              <p class="lead">
+                Fission is staggeringly dense. A 1,000 MW reactor runs for a year on about <strong>27 tonnes of uranium</strong>; a coal station of the same size burns more
+                than 2.5 million tonnes of coal. A single fuel pellet the size of a gummy bear
+                carries as much usable energy as a tonne of coal.
+              </p>
+              <p>
+                That concentration shows up on the map. For the same 1,000 megawatts of capacity,
+                a nuclear plant uses about a square mile of land, while a wind farm needs roughly
+                360 and utility solar around 75.
+              </p>
+              <p>
+                This is land we don't have to pave, fence off, or fight over. Sparing it matters
+                for nature as much as for politics: the least land-hungry clean energy is the one
+                that disturbs the least habitat.
+              </p>
+              <span class="source">
+                Sources: World Nuclear Association,
+                <a href="https://world-nuclear.org/information-library/nuclear-fuel-cycle/introduction/what-is-uranium-how-does-it-work" rel="noopener noreferrer" target="_blank">
+                  "How is uranium made into nuclear fuel?"
+                </a>;
+                Nuclear Energy Institute,
+                <a href="https://www.nei.org/news/2015/land-needs-for-wind-solar-dwarf-nuclear-plants" rel="noopener noreferrer" target="_blank">
+                  "Land Needs for Wind, Solar Dwarf Nuclear Plant's Footprint"
+                </a>
+              </span>
+            </div>
+
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={pellets}
+                  alt="Rows of uranium dioxide fuel pellets, the size of gummy bears, stacked for loading into fuel rods"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  Each of these pellets holds as much energy as a tonne of coal.
+                  <span class="photo-credit">Photo: U.S. NRC / Areva, CC BY 2.0</span>
+                </figcaption>
+              </figure>
+              <div class="chart" aria-label="Land needed per 1,000 MW: nuclear 1.3 square miles, solar 75, wind 360">
+                <h3>Land per 1,000 MW, sq miles</h3>
+                <div class="chart-row">
+                  <span class="chart-label">Wind</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 100%"></span></div>
+                  <span class="chart-value">360</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Solar</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 21%"></span></div>
+                  <span class="chart-value">75</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Nuclear</span>
+                  <div class="chart-track"><span class="chart-bar chart-bar--hl bar-tiny" style="--w: 0.4%"></span></div>
+                  <span class="chart-value">1.3</span>
+                </div>
+                <p class="chart-note">
+                  Amber marks nuclear. Its bar is 1.3 sq miles, barely visible at this scale, which
+                  is exactly the point.
+                </p>
+              </div>
+              <figure class="photo">
+                <Image
+                  src={solar}
+                  alt="A field of solar panels in Spain"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  The same 1,000 MW of solar needs roughly 75 square miles.
+                  <span class="photo-credit">Photo: Fernando Tomás, CC BY 2.0</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 04 RELIABILITY ============ -->
+      <section id="reliability" aria-labelledby="reliability-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">04 · Reliability</p>
+            <h2 id="reliability-title">Always on, whatever the weather</h2>
+            <p>
+              A reactor runs around the clock for 18 to 24 months between refuelings. In the
+              United States, nuclear plants produce electricity more often than any other source.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:activity" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">~93% capacity factor</span>
+                  <span class="stat-label">share of time nuclear plants actually produce power</span>
+                </div>
+              </div>
+              <p class="lead">
+                Capacity factor measures how much of a plant's maximum output it delivers over a
+                year. U.S. nuclear reactors sit near <strong>93%</strong>, the highest of any
+                source, fossil or clean.
+              </p>
+              <p>
+                Wind and solar are cheap but intermittent: a grid built on them needs backup for
+                every still day and every cloudy night, plus storage that is still expensive at
+                scale. Nuclear delivers power whenever you need it, which is why it pairs with
+                renewables instead of competing with them.
+              </p>
+              <p>
+                A nuclear plant is also built to last. Original 40-year licenses are routinely
+                extended to 80, and modern plants are designed for even longer service.
+              </p>
+              <span class="source">
+                Source: U.S. Energy Information Administration,
+                <a href="https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_6_07_b" rel="noopener noreferrer" target="_blank">
+                  capacity factors 2023
+                </a>
+              </span>
+            </div>
+
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={controlRoom}
+                  alt="The control room of a U.S. nuclear power plant, with operators at banks of instrumentation"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  Two dozen staff run a 1,000-megawatt plant, 24/7, for 18–24 months straight.
+                  <span class="photo-credit">Photo: U.S. NRC (public domain)</span>
+                </figcaption>
+              </figure>
+              <div class="chart" aria-label="Average capacity factor by source, 2023: nuclear 93%, gas 60%, coal 42%, wind 33%, solar 23%">
+                <h3>Average capacity factor, 2023</h3>
+                <div class="chart-row">
+                  <span class="chart-label">Nuclear</span>
+                  <div class="chart-track"><span class="chart-bar chart-bar--hl" style="--w: 100%"></span></div>
+                  <span class="chart-value">93%</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Gas</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 64%"></span></div>
+                  <span class="chart-value">60%</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Coal</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 46%"></span></div>
+                  <span class="chart-value">42%</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Wind</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 36%"></span></div>
+                  <span class="chart-value">33%</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Solar</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 25%"></span></div>
+                  <span class="chart-value">23%</span>
+                </div>
+                <p class="chart-note">
+                  Amber marks nuclear: the difference between always on and when the weather
+                  cooperates.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 05 WASTE ============ -->
+      <section id="waste" aria-labelledby="waste-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">05 · Waste</p>
+            <h2 id="waste-title">A tiny, contained problem, not the mountain people imagine</h2>
+            <p>
+              Nuclear waste is small in volume, solid, and stored safely on-site. Meanwhile the
+              "clean" comparison people forget is sitting in coal ash ponds.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:recycle" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">1 football field, ~10 yards deep</span>
+                  <span class="stat-label">all used fuel from 60+ years of U.S. nuclear power</span>
+                </div>
+              </div>
+              <p class="lead">
+                Every reactor's spent fuel from six decades of U.S. commercial nuclear power would
+                fit in a single football field stacked about <strong>ten yards deep</strong>. It is
+                solid ceramic, sealed in steel, and sits in concrete casks monitored on-site. It
+                has not harmed a single member of the public.
+              </p>
+              <p>
+                Compare that with coal: a single large coal plant produces around <strong>100,000 tonnes of ash every year</strong>, and coal ash released into the
+                environment carries around 100 times more radiation than a nuclear plant making
+                the same electricity, with most of it simply dumped or ponded. Nuclear waste is
+                the one waste stream that is fully contained and paid for.
+              </p>
+              <p>
+                Geological disposal, burying it deep in stable rock as Finland is now doing at
+                Onkalo, is a solved engineering problem that politics, not physics, has delayed.
+              </p>
+              <span class="source">
+                Sources: U.S. NRC,
+                <a href="https://www.nrc.gov/waste.html" rel="noopener noreferrer" target="_blank">
+                  "Radioactive Waste"
+                </a>;
+                NEI,
+                <a href="https://www.nei.org/resources/fact-sheets/safely-managing-used-nuclear-fuel" rel="noopener noreferrer" target="_blank">
+                  "Safely Managing Used Nuclear Fuel"
+                </a>;
+                Scientific American,
+                <a href="https://www.scientificamerican.com/article/coal-ash-is-more-radioactive-than-nuclear-waste/" rel="noopener noreferrer" target="_blank">
+                  "Coal Ash Is More Radioactive than Nuclear Waste"
+                </a>
+                (2007);
+                <a href="https://www.posiva.fi/en/" rel="noopener noreferrer" target="_blank">
+                  Posiva (Finland)
+                </a>
+              </span>
+            </div>
+
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={cofrentes}
+                  alt="The cooling towers of the Cofrentes nuclear power plant in Spain"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  The iconic towers emit only water vapor. The plant's waste is solid, contained,
+                  and measured in tonnes per year, not millions.
+                  <span class="photo-credit">Photo: Roberto Uderio, CC BY-SA 3.0</span>
+                </figcaption>
+              </figure>
+              <figure class="photo photo-crop">
+                <Image
+                  src={pelletHand}
+                  alt="A nuclear fuel pellet held in a hand next to a fuel rod"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  The entire fuel cycle, in one hand.
+                  <span class="photo-credit">Photo: U.S. DOE (public domain)</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 06 COST ============ -->
+      <section id="cost" aria-labelledby="cost-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">06 · Cost</p>
+            <h2 id="cost-title">Expensive to start, cheap to run, built to last</h2>
+            <p>
+              The honest picture: reactors are capital-heavy projects. The payoff is decades of
+              some of the cheapest, most stable electricity on the grid.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:coins" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">60–80+ years</span>
+                  <span class="stat-label">operating life, with fuel a tiny share of running costs</span>
+                </div>
+              </div>
+              <p class="lead">
+                Almost all of a reactor's cost is paid <strong>before it opens</strong>. After
+                that, uranium is a small fraction of the operating budget, maintenance is modest,
+                and the plant runs for <strong>60 to 80 years or more</strong>, far longer than any
+                wind turbine or solar panel.
+              </p>
+              <p>
+                Existing U.S. nuclear plants are routinely among the cheapest electricity on their
+                grids, which is why utilities keep extending their licenses rather than replacing
+                them. The cost problem is not the technology's physics. It's that nearly every
+                recent build has been a one-off design, built one at a time.
+              </p>
+              <p>
+                Standardize the design, build in series, and the numbers change dramatically: France
+                built 56 reactors in about 15 years, getting faster and cheaper with each one, and
+                South Korea and China now build reactors on time and on budget the same way.
+              </p>
+              <span class="source">
+                Sources: IEA,
+                <a href="https://www.iea.org/reports/projected-costs-of-generating-electricity" rel="noopener noreferrer" target="_blank">
+                  "Projected Costs of Generating Electricity"
+                </a>;
+                World Nuclear Association,
+                <a href="https://world-nuclear.org/information-library/economic-aspects/economics-of-nuclear-power" rel="noopener noreferrer" target="_blank">
+                  "Economics of Nuclear Power"
+                </a>
+              </span>
+            </div>
+
+            <div class="arg-media">
+              <div class="chart" aria-label="Where a nuclear plant's lifetime cost goes: roughly 60 percent capital/construction, 20 percent operation and maintenance, 10 percent fuel">
+                <h3>Where the money goes (illustrative)</h3>
+                <div class="chart-row">
+                  <span class="chart-label">Build</span>
+                  <div class="chart-track"><span class="chart-bar chart-bar--hl" style="--w: 60%"></span></div>
+                  <span class="chart-value">~60%</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">O&amp;M</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 22%"></span></div>
+                  <span class="chart-value">~20%</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Fuel</span>
+                  <div class="chart-track"><span class="chart-bar" style="--w: 12%"></span></div>
+                  <span class="chart-value">~10%</span>
+                </div>
+                <p class="chart-note">
+                  Amber marks the build cost, paid up front. Then decades of cheap, stable power.
+                  The opposite shape of gas, where fuel bills keep coming every year.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 07 HONEST ============ -->
+      <section id="honest" aria-labelledby="honest-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">07 · The hard part</p>
+            <h2 id="honest-title">What's actually wrong with nuclear, in good faith</h2>
+            <p>
+              No argument for nuclear is honest without naming what's hard. These are the real
+              objections, and they deserve real answers.
+            </p>
+          </div>
+
+          <div class="arg">
+            <div class="arg-copy">
+              <ul class="plain">
+                <li>
+                  <strong>Cost and schedule overruns are real.</strong> Vogtle in Georgia finished
+                  years late at roughly double its budget; Hinkley Point C and Olkiluoto tell the
+                  same story. The lesson isn't "nuclear can't work." It's that custom,
+                  one-off projects are the worst possible way to build them.
+                </li>
+                <li>
+                  <strong>Policy whiplash kills projects.</strong> Plants canceled mid-construction
+                  after political reversals (like the U.S. in the 1980s) mean every project starts
+                  from scratch, and the cost of regulatory stop-start is baked into every estimate.
+                </li>
+                <li>
+                  <strong>Fear is a cost too.</strong> Public perception, however disproportionate
+                  to the data, lengthens permitting and siting timelines. That's a political
+                  problem with an engineering solution: new designs, honest communication, and
+                  demonstrated results.
+                </li>
+                <li>
+                  <strong>Waste siting is stuck.</strong> The technical path, deep geological
+                  disposal, is solved. The political path, choosing a site, is not. Finland proved
+                  it can be done; others are still deciding.
+                </li>
+              </ul>
+              <p>
+                Every one of these is a fixable systems problem. The alternatives, staying on
+                fossil fuels or building the required wind, solar, storage, and transmission
+                instead, carry costs that are equally real and far less discussed.
+              </p>
+            </div>
+
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={tmi}
+                  alt="The Three Mile Island nuclear station in Pennsylvania, site of the 1979 partial meltdown"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  Three Mile Island, 1979. The accident that scared a generation. Zero deaths, and
+                  the reactor's containment worked as designed.
+                  <span class="photo-credit">Photo: U.S. DOE (public domain)</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 08 MYTHS VS FACTS ============ -->
+      <section id="myths" aria-labelledby="myths-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">08 · Myths vs Facts</p>
+            <h2 id="myths-title">What's actually true, myth by myth</h2>
+            <p>Every claim has a number, a study, or a regulator behind it. The facts link to their sources.</p>
+          </div>
+
+          <div class="myths">
+            <article class="myth-card">
+              <div class="myth-panel">
+                <p class="myth-tag"><Icon name="lucide:x" class="ic" aria-hidden="true" /> Myth</p>
+                <p class="myth-claim">A meltdown means the reactor exploded like a nuclear bomb.</p>
+              </div>
+              <div class="fact-panel">
+                <p class="fact-tag"><Icon name="lucide:check" class="ic" aria-hidden="true" /> Fact</p>
+                <p>
+                  A commercial reactor cannot detonate like an atomic bomb: the fuel is too
+                  low-enriched to sustain the runaway chain reaction a weapon needs. Meltdowns are
+                  real and serious, but they are an overheating-and-containment problem, never a
+                  nuclear explosion.
+                </p>
+                <span class="source">
+                  Source: Congressional Research Service,
+                  <a href="https://www.everycrsreport.com/reports/R41728.html" rel="noopener noreferrer" target="_blank">
+                    The Japanese Nuclear Incident: Technical Aspects
+                  </a>
+                </span>
+              </div>
+            </article>
+
+            <article class="myth-card">
+              <div class="myth-panel">
+                <p class="myth-tag"><Icon name="lucide:x" class="ic" aria-hidden="true" /> Myth</p>
+                <p class="myth-claim">Used fuel will poison the planet for a million years.</p>
+              </div>
+              <div class="fact-panel">
+                <p class="fact-tag"><Icon name="lucide:check" class="ic" aria-hidden="true" /> Fact</p>
+                <p>
+                  All the used fuel the U.S. has ever produced would fit on a football field
+                  stacked about ten yards deep. It sits in cooled pools or sealed steel-and-concrete
+                  casks, monitored and contained — the one waste stream that is fully paid for and
+                  fully accounted for.
+                </p>
+                <span class="source">
+                  Source: U.S. NRC,
+                  <a href="https://www.nrc.gov/waste.html" rel="noopener noreferrer" target="_blank">
+                    Radioactive Waste
+                  </a>
+                </span>
+              </div>
+            </article>
+
+            <article class="myth-card">
+              <div class="myth-panel">
+                <p class="myth-tag"><Icon name="lucide:x" class="ic" aria-hidden="true" /> Myth</p>
+                <p class="myth-claim">Chernobyl and Fukushima proved nuclear power is unsafe.</p>
+              </div>
+              <div class="fact-panel">
+                <p class="fact-tag"><Icon name="lucide:check" class="ic" aria-hidden="true" /> Fact</p>
+                <p>
+                  In more than 20,000 reactor-years of commercial operation, those are the only two
+                  major accidents. Chernobyl was a unique design with no containment, running an
+                  ill-conceived test; Fukushima was hit by a tsunami far beyond its design basis.
+                  At Fukushima, no one died from radiation.
+                </p>
+                <span class="source">
+                  Source: World Nuclear Association,
+                  <a
+                    href="https://world-nuclear.org/information-library/safety-and-security/safety-of-plants/safety-of-nuclear-power-reactors"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Safety of Nuclear Power Reactors
+                  </a>
+                </span>
+              </div>
+            </article>
+
+            <article class="myth-card">
+              <div class="myth-panel">
+                <p class="myth-tag"><Icon name="lucide:x" class="ic" aria-hidden="true" /> Myth</p>
+                <p class="myth-claim">Wind and solar alone are enough, so nuclear is obsolete.</p>
+              </div>
+              <div class="fact-panel">
+                <p class="fact-tag"><Icon name="lucide:check" class="ic" aria-hidden="true" /> Fact</p>
+                <p>
+                  The sun sets and the wind stops. Every serious decarbonization pathway keeps
+                  nuclear in the mix, because it runs around the clock and cuts the enormous
+                  storage and backup that weather-dependent power otherwise demands.
+                </p>
+                <span class="source">
+                  Source: International Energy Agency,
+                  <a
+                    href="https://www.iea.org/reports/nuclear-power-and-secure-energy-transitions"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Nuclear Power and Secure Energy Transitions
+                  </a>
+                </span>
+              </div>
+            </article>
+
+            <article class="myth-card">
+              <div class="myth-panel">
+                <p class="myth-tag"><Icon name="lucide:x" class="ic" aria-hidden="true" /> Myth</p>
+                <p class="myth-claim">Nuclear is too expensive and takes too long to matter.</p>
+              </div>
+              <div class="fact-panel">
+                <p class="fact-tag"><Icon name="lucide:check" class="ic" aria-hidden="true" /> Fact</p>
+                <p>
+                  A running reactor is among the cheapest electricity there is — fuel is a tiny
+                  share of the cost. The expensive part is first-of-a-kind construction and
+                  financing, and countries that build in series, like France and South Korea,
+                  brought those costs down.
+                </p>
+                <span class="source">
+                  Source: International Energy Agency,
+                  <a
+                    href="https://www.iea.org/reports/projected-costs-of-generating-electricity"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Projected Costs of Generating Electricity
+                  </a>
+                </span>
+              </div>
+            </article>
+
+            <article class="myth-card">
+              <div class="myth-panel">
+                <p class="myth-tag"><Icon name="lucide:x" class="ic" aria-hidden="true" /> Myth</p>
+                <p class="myth-claim">Civilian nuclear programs are how countries build the bomb.</p>
+              </div>
+              <div class="fact-panel">
+                <p class="fact-tag"><Icon name="lucide:check" class="ic" aria-hidden="true" /> Fact</p>
+                <p>
+                  IAEA safeguards exist precisely to keep the two apart: inspectors track nuclear
+                  material and equipment. Most weapons states built their arsenals before or
+                  outside civilian power — which is why almost every country with nuclear
+                  electricity has no weapons.
+                </p>
+                <span class="source">
+                  Source: World Nuclear Association,
+                  <a
+                    href="https://world-nuclear.org/information-library/safety-and-security/non-proliferation/safeguards-to-prevent-nuclear-proliferation"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Safeguards to Prevent Nuclear Proliferation
+                  </a>
+                </span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 09 FAQ ============ -->
+      <section id="faq" aria-labelledby="faq-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="section-num">09 · Myth-busting</p>
+            <h2 id="faq-title">The objections, answered</h2>
+            <p>Short answers to the questions that come up every time.</p>
+          </div>
+
+          <div class="faq">
+            <details class="faq-item">
+              <summary>Isn't nuclear dangerous? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  By the only measure that matters, deaths per unit of electricity, nuclear is
+                  comparable to wind and solar, and a fraction of hydro, gas, oil, and coal. The
+                  fear is understandable; the data says otherwise.
+                </p>
+              </div>
+            </details>
+            <details class="faq-item">
+              <summary>What about Chernobyl? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  Chernobyl was a Soviet-era reactor with no containment building, a dangerously
+                  unstable design, and a crew running an unauthorized experiment. That combination
+                  is impossible in a modern licensed plant, and the international community spent
+                  decades fixing even the lessons of it. It is not representative of nuclear
+                  technology; it is the cautionary tale of why safety culture and containment
+                  exist.
+                </p>
+              </div>
+            </details>
+            <details class="faq-item">
+              <summary>What about Fukushima? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  A tsunami far larger than anything the plant was designed to withstand knocked
+                  out backup power. Yet
+                  the direct death toll from radiation was zero. The evacuations themselves caused
+                  most of the harm. Reactors shut down safely; the lesson was to harden backup
+                  systems further, which the industry has done.
+                </p>
+              </div>
+            </details>
+            <details class="faq-item">
+              <summary>What about the waste? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  All of it is small in volume, solid, and safely contained on-site, nothing like
+                  the unfiltered byproducts of coal. Deep geological disposal is a solved
+                  engineering problem (Finland is doing it). The delay is political, not technical.
+                </p>
+              </div>
+            </details>
+            <details class="faq-item">
+              <summary>Can't renewables do it alone? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  Wind and solar are essential, and intermittent. A grid running on them needs
+                  enormous storage, backup capacity, and transmission, which still costs more than
+                  power that's there whenever you need it. Nuclear and renewables are complements,
+                  not rivals: France pairs
+                  roughly two-thirds nuclear with growing renewables and has some of Europe's
+                  lowest-carbon electricity.
+                </p>
+              </div>
+            </details>
+            <details class="faq-item">
+              <summary>Doesn't it take too long and cost too much? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  Today's megaprojects are slow because each is a one-off. France built 56 reactors
+                  in about 15 years by standardizing one design; South Korea and China do the same
+                  now. Small modular reactors aim to move construction to factories. The first
+                  build is always the hardest. The fix is building more, not giving up.
+                </p>
+              </div>
+            </details>
+            <details class="faq-item">
+              <summary>Doesn't it help nuclear weapons? <Icon name="lucide:chevron-down" class="faq-chev" aria-hidden="true" /></summary>
+              <div class="faq-body">
+                <p>
+                  Civilian power reactors run on lightly enriched fuel that cannot be used in
+                  weapons, and international inspectors monitor them around the clock. The
+                  countries that built weapons did it in dedicated military programs, not power
+                  plants. Stopping the spread of nuclear weapons is a treaty problem, not an
+                  argument against electricity.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PHILIPPINES DEEP DIVE ============ -->
+      <section class="ph-teaser" aria-labelledby="ph-teaser-title">
+        <div class="container">
+          <div class="ph-teaser-card">
+            <div class="ph-teaser-body">
+              <p class="section-num">Beyond the article</p>
+              <h2 id="ph-teaser-title">Why do so many Filipinos distrust nuclear power?</h2>
+              <p>
+                Bataan's scar, the Ring of Fire, and the question that matters most: institutions.
+                A sourced deep dive, claim by claim.
+              </p>
+            </div>
+            <a class="btn btn-primary" href="/nuclear-in-philippines/">Read the deep dive <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FINAL CTA ============ -->
+      <section class="cta" aria-labelledby="cta-title">
+        <div class="container">
+          <div class="cta-card">
+            <p class="section-num">Now it's your turn</p>
+            <h2 id="cta-title">The evidence is on the page. Check the sources, then decide.</h2>
+            <p>
+              Every number here links to its primary source. If you disagree with the case,
+              argue with the data.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#top">Review the evidence <Icon name="lucide:arrow-up" class="ic" aria-hidden="true" /></a>
+              <a class="btn btn-light" href="#sources">Read the sources <Icon name="lucide:book-open" class="ic" aria-hidden="true" /></a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="sources" id="sources" aria-labelledby="sources-title">
+        <div class="container">
+          <h2 id="sources-title">Sources & further reading</h2>
+        <ul>
+          <li>
+            <a href="https://www.ipcc.ch/report/ar5/wg3/" rel="noopener noreferrer" target="_blank">
+              IPCC, AR5 Working Group III: lifecycle greenhouse gas emissions by technology
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.eia.gov/electricity/monthly/epm_table_grapher.php?t=epmt_6_07_b" rel="noopener noreferrer" target="_blank">
+              U.S. EIA, Electric Power Monthly, Table 6.07.B — capacity factors (2023)
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.nei.org/news/2015/land-needs-for-wind-solar-dwarf-nuclear-plants" rel="noopener noreferrer" target="_blank">
+              Nuclear Energy Institute, land needs for wind, solar, and nuclear
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://world-nuclear.org/information-library/nuclear-fuel-cycle/introduction/what-is-uranium-how-does-it-work" rel="noopener noreferrer" target="_blank">
+              World Nuclear Association, what is uranium, how does it work
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://ourworldindata.org/safest-sources-of-energy" rel="noopener noreferrer" target="_blank">
+              Our World in Data, what are the safest and cleanest sources of energy?
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://world-nuclear.org/information-library/safety-and-security/safety-of-plants/safety-of-nuclear-power-reactors" rel="noopener noreferrer" target="_blank">
+              World Nuclear Association, safety of nuclear power reactors
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.everycrsreport.com/reports/R41728.html" rel="noopener noreferrer" target="_blank">
+              Congressional Research Service, the Japanese nuclear incident: technical aspects
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.iea.org/reports/nuclear-power-and-secure-energy-transitions" rel="noopener noreferrer" target="_blank">
+              IEA, nuclear power and secure energy transitions
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.nrc.gov/waste.html" rel="noopener noreferrer" target="_blank">
+              U.S. NRC, radioactive waste
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.scientificamerican.com/article/coal-ash-is-more-radioactive-than-nuclear-waste/" rel="noopener noreferrer" target="_blank">
+              Scientific American, coal ash is more radioactive than nuclear waste (2007)
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.nei.org/resources/fact-sheets/safely-managing-used-nuclear-fuel" rel="noopener noreferrer" target="_blank">
+              Nuclear Energy Institute, safely managing used nuclear fuel
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.posiva.fi/en/" rel="noopener noreferrer" target="_blank">
+              Posiva (Finland), final disposal of spent fuel
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://www.iea.org/reports/projected-costs-of-generating-electricity" rel="noopener noreferrer" target="_blank">
+              IEA, projected costs of generating electricity
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://world-nuclear.org/information-library/economic-aspects/economics-of-nuclear-power" rel="noopener noreferrer" target="_blank">
+              World Nuclear Association, economics of nuclear power
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+          <li>
+            <a href="https://world-nuclear.org/information-library/safety-and-security/non-proliferation/safeguards-to-prevent-nuclear-proliferation" rel="noopener noreferrer" target="_blank">
+              World Nuclear Association, safeguards to prevent nuclear proliferation
+              <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+            </a>
+          </li>
+        </ul>
+
+        <h2 class="credits-title">Image credits</h2>
+        <div class="credits">
+          <p>
+            All photos are freely licensed for reuse with attribution. Full details, file pages,
+            and license links: <a href="/credits/">photo credits page</a>.
+          </p>
+          <ul>
+            <li>Hero: Gravelines NPP · Ralf Bächle, CC BY-SA 3.0</li>
+            <li>Wind farm: Barrow Offshore Wind · Muhammad Mahdi Karim, CC BY-SA 3.0</li>
+            <li>Fuel pellets: U.S. NRC / Areva, CC BY 2.0</li>
+            <li>Solar field: Fernando Tomás, CC BY 2.0</li>
+            <li>Control room: U.S. NRC, public domain</li>
+            <li>Diablo Canyon: marya (emdot), CC BY 2.0</li>
+            <li>Cooling towers: Cofrentes, Spain · Roberto Uderio, CC BY-SA 3.0</li>
+            <li>Pellet in hand: U.S. DOE, public domain</li>
+            <li>Three Mile Island: U.S. DOE, public domain</li>
+          </ul>
+        </div>
+
+          <div class="meta">
+            <span>Every figure on this page links to its source. Data can and does change, so check the links.</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="#top" aria-label="Why Nuclear, back to top">
+              <svg viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="32" cy="32" r="6" fill="#ffc53d" />
+                <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(-30 32 32)" />
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(30 32 32)" />
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(90 32 32)" />
+                </g>
+              </svg>
+              Why Nuclear
+            </a>
+            <p>The evidence, plainly. Every number on this page links to its primary source — check them, then decide.</p>
+          </div>
+          <nav class="footer-col" aria-label="The argument">
+            <h2>The argument</h2>
+            <ul>
+              <li><a href="#climate">Climate</a></li>
+              <li><a href="#safety">Safety</a></li>
+              <li><a href="#density">Density</a></li>
+              <li><a href="#reliability">Reliability</a></li>
+              <li><a href="#waste">Waste</a></li>
+              <li><a href="#cost">Cost</a></li>
+              <li><a href="#myths">Myths</a></li>
+              <li><a href="#faq">FAQ</a></li>
+            </ul>
+          </nav>
+          <nav class="footer-col" aria-label="Resources">
+            <h2>Resources</h2>
+            <ul>
+              <li><a href="#sources">Sources & further reading</a></li>
+              <li><a href="/nuclear-in-philippines/">Why do so many Filipinos distrust nuclear power?</a></li>
+              <li><a href="/credits/">Photo credits</a></li>
+              <li><a href="#top">Back to top</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} Why Nuclear</span>
+          <span>All photos are freely licensed for reuse with attribution.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Scrollspy: highlight the nav link for the section in view, and mirror
+      // it into the URL hash so the address bar always points at what you're
+      // reading (replaceState — no history spam, no scroll jump; the hero
+      // clears the hash). Tiny and self-contained; without JS the page simply
+      // skips the highlight and keeps the URL as-is.
+      if ("IntersectionObserver" in window) {
+        var links = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
+        var ids = links.map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        // NB: the variable must NOT be named `top` — at global scope that
+        // collides with the built-in window.top (the topmost window), the
+        // assignment silently fails, and observe() throws "not of type
+        // Element" after observing the first nine sections.
+        var hero = document.getElementById("top");
+        if (hero) sections.push(hero);
+        var setActive = function (id) {
+          links.forEach(function (l) {
+            l.classList.toggle("active", l.getAttribute("href") === "#" + id);
+          });
+        };
+        var setHash = function (id) {
+          try {
+            if (id === "top") {
+              if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+            } else if (location.hash !== "#" + id) {
+              history.replaceState(null, "", "#" + id);
+            }
+          } catch (e) {}
+        };
+        var spy = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) {
+                setActive(e.target.id);
+                setHash(e.target.id);
+              }
+            });
+          },
+          { rootMargin: "-40% 0px -55% 0px" }
+        );
+        sections.forEach(function (s) {
+          spy.observe(s);
+        });
+
+        // Deep links: light up the target nav link immediately, before the
+        // observer's first callbacks (which fire while the browser's own
+        // fragment scroll is still settling). The hash may not be committed
+        // yet at script run, so also adopt on hashchange — the moment the
+        // browser applies the fragment — and on any nav-link click.
+        var adoptFromHash = function () {
+          var id = location.hash.slice(1);
+          if (id && sections.indexOf(document.getElementById(id)) !== -1) {
+            setActive(id);
+          }
+        };
+        adoptFromHash();
+        window.addEventListener("hashchange", adoptFromHash);
+        document.querySelectorAll(".nav-links a, .nav-panel a").forEach(function (a) {
+          a.addEventListener("click", adoptFromHash);
+        });
+
+        // Belt-and-suspenders for the very top of the page: the observer
+        // tracks the hero like every other section, and a passive scroll
+        // listener guarantees the hash clears deterministically at scrollY 0.
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (window.scrollY <= 1) {
+              setActive("top");
+              setHash("top");
+            }
+          },
+          { passive: true }
+        );
+
+        // Back-to-top links (brand, CTA, footer) must never put "#top" in
+        // the URL: intercept the click, smooth-scroll instead, and clear any
+        // hash already present.
+        document.addEventListener("click", function (e) {
+          var a = e.target.closest ? e.target.closest('a[href="#top"]') : null;
+          if (a) {
+            e.preventDefault();
+            setActive("top");
+            setHash("top");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+
+        // Landing on /#top (a shared link) should settle to a clean URL once
+        // the browser's own fragment scroll has finished.
+        window.addEventListener("load", function () {
+          if (location.hash === "#top") {
+            setActive("top");
+            setHash("top");
+            return;
+          }
+          // Adopt whichever section the browser actually landed on: covers
+          // scroll-restored reloads and any fragment scroll still finishing
+          // when the observer's first callbacks ran.
+          var bandTop = window.innerHeight * 0.4;
+          var bandBottom = window.innerHeight * 0.45;
+          var best = null;
+          sections.forEach(function (s) {
+            var r = s.getBoundingClientRect();
+            if (r.top <= bandBottom && r.bottom >= bandTop && (!best || r.top < best.top)) {
+              best = { el: s, top: r.top };
+            }
+          });
+          if (best) {
+            setActive(best.el.id);
+            setHash(best.el.id);
+          }
+        });
+      }
+
+      // Mobile menu: close when a link is chosen or Escape is pressed.
+      var navToggle = document.getElementById("nav-toggle");
+      if (navToggle) {
+        document.querySelectorAll(".nav-panel a").forEach(function (a) {
+          a.addEventListener("click", function () {
+            navToggle.checked = false;
+          });
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") navToggle.checked = false;
+        });
+      }
+
+      // Theme toggle: flip data-theme and remember the choice.
+      var themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        var syncToggle = function (theme) {
+          themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+          themeToggle.setAttribute(
+            "aria-label",
+            theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+          );
+        };
+        var applyTheme = function (theme, persist) {
+          document.documentElement.setAttribute("data-theme", theme);
+          if (persist) {
+            try {
+              localStorage.setItem("theme", theme);
+            } catch (e) {}
+          }
+          syncToggle(theme);
+        };
+        // Reflect the theme resolved in <head> without persisting it (the user
+        // hasn't chosen; the OS preference should keep following them).
+        syncToggle(document.documentElement.getAttribute("data-theme") || "dark");
+        themeToggle.addEventListener("click", function () {
+          var current = document.documentElement.getAttribute("data-theme");
+          applyTheme(current === "dark" ? "light" : "dark", true);
+        });
+      }
+    </script>
+  </body>
+</html>

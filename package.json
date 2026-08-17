@@ -1,0 +1,32 @@
+{
+  "name": "civil-chroma",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "verify:credits": "node scripts/verify-credits.mjs",
+    "generate:og": "node scripts/generate-og-image.mjs",
+    "verify:og": "node scripts/verify-og-images.mjs",
+    "build": "npm run verify:credits && npm run generate:og && astro build && npm run verify:og",
+    "preview": "astro preview",
+    "vercel-build": "npx browsers install chrome@stable && npm run build",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@iconify-json/lucide": "^1.2.123",
+    "astro": "^7.1.6",
+    "astro-icon": "^1.1.5"
+  },
+  "devDependencies": {
+    "@puppeteer/browsers": "^3.2.0",
+    "lighthouse": "^13.4.1",
+    "marked": "^18.0.9",
+    "puppeteer-core": "^25.7.0"
+  }
+}

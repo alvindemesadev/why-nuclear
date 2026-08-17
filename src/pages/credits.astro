@@ -1,0 +1,659 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { marked } from "marked";
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/manrope";
+import "../styles/global.css";
+
+import gravelines from "../assets/img/gravelines.jpg";
+import doel from "../assets/img/doel.jpg";
+import diablo from "../assets/img/diablo.jpg";
+import pellets from "../assets/img/pellets.jpg";
+import pelletHand from "../assets/img/pellet-hand.jpg";
+import controlRoom from "../assets/img/control-room.jpg";
+import cofrentes from "../assets/img/cofrentes.jpg";
+import solar from "../assets/img/solar.jpg";
+import wind from "../assets/img/wind.jpg";
+import tmi from "../assets/img/tmi.jpg";
+import bataan from "../assets/img/bataan.jpg";
+
+// The latin subset woff2 files the @fontsource CSS actually serves. Preloading
+// them makes the first layout use the webfonts directly, so font-display: swap
+// never re-lays-out the page (that pre-first-paint swap is what showed up as
+// CLS in Lighthouse's mobile-emulation trace).
+import frauncesWoff from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2";
+import manropeWoff from "@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2";
+
+const imgMap = {
+  gravelines,
+  doel,
+  diablo,
+  pellets,
+  "pellet-hand": pelletHand,
+  "control-room": controlRoom,
+  cofrentes,
+  solar,
+  wind,
+  tmi,
+  bataan,
+};
+
+// Parse public/CREDITS.md at build time so the page always matches the
+// machine-readable record that the verify-credits script checks.
+const md = readFileSync(path.join(process.cwd(), "public", "CREDITS.md"), "utf8");
+
+// The full document, rendered to HTML at build time from the same file the
+// verify-credits script checks — so the public page never drifts from the
+// machine-readable record. External links open in a new tab with noopener.
+const fullHtml = marked.parse(md).replace(
+  /<a href="(https?:[^"]+)"/g,
+  '<a href="$1" rel="noopener noreferrer" target="_blank"'
+);
+const entries = md
+  .split(/^## \d+\./m)
+  .slice(1)
+  .map((block) => {
+    const line = (key) => {
+      const m = block.match(new RegExp(`\\*\\*${key}:\\*\\* (.*)`));
+      return m ? m[1].trim() : "";
+    };
+    const titleLine = block.split("\n")[0].trim();
+    const roleMatch = titleLine.match(/— \*([^*]+)\*/);
+    const title = titleLine
+      .replace(/^[\d.]+ /, "")
+      .replace(/ — .*/, "")
+      .replace(/\.jpe?g$/i, "");
+    const lic = line("License");
+    const licLink = lic.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    return {
+      title,
+      role: roleMatch ? roleMatch[1] : "",
+      subject: line("Subject"),
+      filePage: line("File page"),
+      local: line("Local"),
+      author: line("Author"),
+      licenseText: lic.startsWith("Public domain")
+        ? "Public domain"
+        : licLink
+          ? licLink[1]
+          : lic,
+      licenseUrl: licLink ? licLink[2] : "",
+    };
+  })
+  .map((e) => ({ ...e, img: imgMap[e.local.replace(/\.jpe?g$/i, "")] ?? null }));
+
+const siteTitle = "Photo credits & licenses — Why Nuclear";
+const siteDescription =
+  "Full attribution for every photo on Why Nuclear: photographers, licenses, and links to the original Wikimedia Commons files.";
+
+// Schema.org structured data: a WebPage entity — this is a reference page,
+// not an article — with the share image, URL, and publisher, matching the
+// shape used on the article and deep-dive pages.
+const webPageJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  headline: siteTitle,
+  description: siteDescription,
+  image: new URL("/og-credits.jpg", Astro.site).href,
+  url: new URL("/credits/", Astro.site).href,
+  inLanguage: "en",
+  mainEntityOfPage: new URL("/credits/", Astro.site).href,
+  publisher: {
+    "@type": "Organization",
+    name: "Why Nuclear",
+    url: new URL("/", Astro.site).href,
+    logo: {
+      "@type": "ImageObject",
+      url: new URL("/favicon.svg", Astro.site).href,
+    },
+  },
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={frauncesWoff} />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={manropeWoff} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{siteTitle}</title>
+    <meta name="description" content={siteDescription} />
+    <link rel="canonical" href={new URL("/credits/", Astro.site).href} />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={siteDescription} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Why Nuclear" />
+    <meta property="og:url" content={new URL("/credits/", Astro.site).href} />
+    <meta
+      property="og:image"
+      content={new URL("/og-credits.jpg", Astro.site).href}
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta
+      property="og:image:alt"
+      content="A three-photo mosaic from the site — fuel pellets, a control room, a reactor building — with the headline: every photo on this site, credited"
+    />
+    <script type="application/ld+json" set:html={webPageJsonLd} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={siteDescription} />
+    <meta
+      name="twitter:image"
+      content={new URL("/og-credits.jpg", Astro.site).href}
+    />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#faf6ef" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0e13" />
+    <script is:inline>
+      (function () {
+        try {
+          var theme = localStorage.getItem("theme");
+          if (theme !== "light" && theme !== "dark") {
+            theme = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          }
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="brand" href="/" aria-label="Why Nuclear, back to the article">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="6" fill="#ffc53d" />
+          <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(-30 32 32)" />
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(30 32 32)" />
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(90 32 32)" />
+          </g>
+        </svg>
+        Why Nuclear
+      </a>
+      <button
+        id="theme-toggle"
+        class="theme-toggle"
+        type="button"
+        aria-pressed="false"
+        aria-label="Switch to light theme"
+      >
+        <Icon name="lucide:sun" class="ic ic-sun" aria-hidden="true" />
+        <Icon name="lucide:moon" class="ic ic-moon" aria-hidden="true" />
+      </button>
+    </header>
+
+    <main class="credit-main" id="top">
+      <div class="container">
+        <a class="credit-back" href="/">
+          <Icon name="lucide:arrow-left" class="ic" aria-hidden="true" />
+          Back to the article
+        </a>
+        <p class="section-num">Attribution</p>
+        <h1>Photo credits &amp; licenses</h1>
+        <p class="credit-intro">
+          Every photo on this site is free to use with attribution. This page is the full
+          record: who took each photo, under what license, and where to find the original
+          file. The licenses require attribution with a link — that's what the amber badges
+          are for.
+        </p>
+
+        <div class="credit-grid">
+          {
+            entries.map((e) => (
+              <article class="credit-card">
+                {e.img && (
+                  <Image
+                    src={e.img}
+                    alt={e.subject}
+                    widths={[320, 480]}
+                    sizes="(max-width: 860px) 50vw, 280px"
+                    loading="lazy"
+                    decoding="async"
+                    class="credit-thumb"
+                  />
+                )}
+                <div class="credit-body">
+                  <h2>{e.title}</h2>
+                  {e.role && <p class="credit-role">{e.role}</p>}
+                  <p class="credit-subject">{e.subject}</p>
+                  <p class="credit-author">{e.author}</p>
+                  <div class="credit-links">
+                    {e.licenseUrl && e.licenseText && (
+                      <a class="credit-license" href={e.licenseUrl} rel="noopener noreferrer" target="_blank">
+                        {e.licenseText}
+                      </a>
+                    )}
+                    <a class="credit-file" href={e.filePage} rel="noopener noreferrer" target="_blank">
+                      View on Wikimedia Commons
+                      <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" />
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+
+        <details class="credit-full">
+          <summary>
+            Full document
+            <Icon name="lucide:chevron-down" class="ic" aria-hidden="true" />
+          </summary>
+          <div class="credit-md" set:html={fullHtml} />
+        </details>
+
+      </div>
+    </main>
+
+    <footer class="site-footer credit-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="/" aria-label="Why Nuclear, back to the article">
+              <svg viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="32" cy="32" r="6" fill="#ffc53d" />
+                <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(-30 32 32)" />
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(30 32 32)" />
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(90 32 32)" />
+                </g>
+              </svg>
+              Why Nuclear
+            </a>
+            <p>The evidence, plainly. Every number on the article links to its primary source — check them, then decide.</p>
+          </div>
+          <nav class="footer-col" aria-label="Resources">
+            <h2>Resources</h2>
+            <ul>
+              <li><a href="/#sources">Sources & further reading</a></li>
+              <li><a href="/nuclear-in-philippines/">Why do so many Filipinos distrust nuclear power?</a></li>
+              <li><a class="active" href="/credits/" aria-current="page">Photo credits</a></li>
+              <li><a href="#top">Back to top</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} Why Nuclear</span>
+          <span>All photos are freely licensed for reuse with attribution.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Theme toggle: flip data-theme and remember the choice (same as the
+      // article page; the <head> script resolved the initial theme).
+      var themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        var syncToggle = function (theme) {
+          themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+          themeToggle.setAttribute(
+            "aria-label",
+            theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+          );
+        };
+        var applyTheme = function (theme, persist) {
+          document.documentElement.setAttribute("data-theme", theme);
+          if (persist) {
+            try {
+              localStorage.setItem("theme", theme);
+            } catch (e) {}
+          }
+          syncToggle(theme);
+        };
+        syncToggle(document.documentElement.getAttribute("data-theme") || "dark");
+        themeToggle.addEventListener("click", function () {
+          var current = document.documentElement.getAttribute("data-theme");
+          applyTheme(current === "dark" ? "light" : "dark", true);
+        });
+      }
+
+      // Mobile menu: close when a link is chosen or Escape is pressed.
+      var navToggle = document.getElementById("nav-toggle");
+      if (navToggle) {
+        document.querySelectorAll(".nav-panel a").forEach(function (a) {
+          a.addEventListener("click", function () {
+            navToggle.checked = false;
+          });
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") navToggle.checked = false;
+        });
+      }
+
+      // Back-to-top links never put "#top" in the URL: smooth-scroll
+      // instead, and clear any hash that's already there.
+      document.addEventListener("click", function (e) {
+        var a = e.target.closest ? e.target.closest('a[href="#top"]') : null;
+        if (a) {
+          e.preventDefault();
+          if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+
+      // Landing on /#top (a shared link) should settle to a clean URL once
+      // the browser's own fragment scroll has finished.
+      window.addEventListener("load", function () {
+        if (location.hash === "#top") {
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .credit-main {
+    padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(2rem, 5vw, 3rem);
+  }
+
+  .credit-main h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem;
+    font-weight: 620;
+  }
+
+  .credit-intro {
+    max-width: 46rem;
+    color: var(--muted);
+    font-size: 1.1rem;
+    margin: 0 0 2.5rem;
+  }
+
+  .credit-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    margin: 0 0 1.5rem;
+  }
+
+  .credit-back .ic {
+    width: 1em;
+    height: 1em;
+    flex: none;
+  }
+
+  .credit-back:hover {
+    color: var(--accent-text);
+  }
+
+  /* The credits footer has no "The argument" column (this page has no
+     article sections), so the shared 3-column footer grid becomes 2. */
+  .credit-footer .footer-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  @media (max-width: 700px) {
+    .credit-footer .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .credit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 860px) {
+    .credit-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .credit-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .credit-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .credit-thumb {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .credit-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    flex: 1;
+    padding: 1rem 1.15rem 1.2rem;
+  }
+
+  .credit-body h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .credit-role {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin: 0;
+  }
+
+  .credit-subject {
+    flex: 1;
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 0;
+  }
+
+  .credit-author {
+    color: var(--text);
+    font-size: 0.92rem;
+    margin: 0;
+  }
+
+  .credit-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .credit-license {
+    display: inline-flex;
+    align-items: center;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    text-decoration: none;
+  }
+
+  .credit-license:hover {
+    color: var(--accent-ink);
+  }
+
+  .credit-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--teal);
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+
+  .credit-file .ic {
+    width: 0.95em;
+    height: 0.95em;
+  }
+
+  .credit-file:hover {
+    color: var(--accent-text);
+  }
+
+  .credit-full {
+    margin-top: 2.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+    overflow: hidden;
+  }
+
+  /* Smooth open/close, same as the FAQ accordion: animate the content
+     wrapper's height from 0 to auto via ::details-content (Baseline 2025)
+     with the interpolate-size already enabled on :root. Engines without
+     support snap open/closed — the pre-animation behavior. */
+  .credit-full::details-content {
+    block-size: 0;
+    overflow-y: clip;
+    content-visibility: hidden;
+    transition:
+      block-size 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      content-visibility 0.32s allow-discrete;
+  }
+
+  .credit-full[open]::details-content {
+    block-size: auto;
+    content-visibility: visible;
+  }
+
+  .credit-full summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.3rem;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    list-style: none;
+  }
+
+  .credit-full summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .credit-full summary .ic {
+    width: 1.05em;
+    height: 1.05em;
+    color: var(--accent-text);
+    transition: transform 0.2s ease;
+    flex: none;
+  }
+
+  .credit-full[open] summary .ic {
+    transform: rotate(180deg);
+  }
+
+  .credit-md {
+    border-top: 1px solid var(--line);
+    padding: 1.3rem 1.5rem 1.6rem;
+    color: var(--arg-text);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    max-width: 52rem;
+  }
+
+  .credit-md h1,
+  .credit-md h2,
+  .credit-md h3 {
+    font-family: var(--font-display);
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .credit-md h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.8rem;
+  }
+
+  .credit-md h2 {
+    font-size: 1.2rem;
+    margin: 1.6rem 0 0.6rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .credit-md h2:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .credit-md p {
+    margin: 0 0 0.9rem;
+  }
+
+  .credit-md ul {
+    margin: 0 0 1rem;
+    padding-left: 1.4rem;
+  }
+
+  .credit-md li {
+    margin-bottom: 0.35rem;
+  }
+
+  .credit-md code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.1em 0.4em;
+    color: var(--text);
+  }
+
+  .credit-md a {
+    color: var(--accent-text);
+  }
+
+  .credit-md table {
+    border-collapse: collapse;
+    margin: 1rem 0;
+    width: 100%;
+    font-size: 0.92rem;
+  }
+
+  .credit-md th,
+  .credit-md td {
+    border: 1px solid var(--line);
+    padding: 0.5rem 0.8rem;
+    text-align: left;
+  }
+
+  .credit-md th {
+    color: var(--text);
+    background: var(--bg-soft);
+  }
+
+  .credit-md hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 1.5rem 0;
+  }
+</style>

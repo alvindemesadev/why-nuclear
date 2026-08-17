@@ -1,0 +1,965 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import "astro-icon/components";
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/manrope";
+import "../styles/global.css";
+
+import bataan from "../assets/img/bataan.jpg";
+import tmi from "../assets/img/tmi.jpg";
+import pelletHand from "../assets/img/pellet-hand.jpg";
+import controlRoom from "../assets/img/control-room.jpg";
+import frauncesWoff from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2";
+import manropeWoff from "@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2";
+
+// The Bataan source is 960px wide, so cap the srcset at 960 — generating
+// 1280/1920 would upscale and waste bytes.
+const heroWidths = [480, 640, 960];
+const colWidths = [480, 720];
+const img = {
+  alt: "",
+  loading: "lazy" as const,
+  decoding: "async" as const,
+  sizes: "(max-width: 860px) 100vw, 50vw",
+};
+
+const siteTitle = "Nuclear in the Philippines — Why Nuclear";
+// Search-engine-friendly: keyword-led ("nuclear power" + "Philippines"), the
+// question people search, and the page's thesis — 154 chars, under Google's
+// ~160-char display limit. Shared by description / og / twitter metas.
+const siteDescription =
+  "Why many Filipinos distrust nuclear power in the Philippines: Bataan's never-fueled plant, the Ring of Fire, and whether institutions could run one safely.";
+
+// Schema.org structured data so search engines treat this as a first-class
+// article, not just a page: headline, description, share image, and publisher.
+const articleJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: siteTitle,
+  description: siteDescription,
+  image: new URL("/og-philippines.jpg", Astro.site).href,
+  url: new URL("/nuclear-in-philippines/", Astro.site).href,
+  inLanguage: "en",
+  mainEntityOfPage: new URL("/nuclear-in-philippines/", Astro.site).href,
+  author: {
+    "@type": "Organization",
+    name: "Why Nuclear",
+    url: new URL("/", Astro.site).href,
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Why Nuclear",
+    url: new URL("/", Astro.site).href,
+    logo: {
+      "@type": "ImageObject",
+      url: new URL("/favicon.svg", Astro.site).href,
+    },
+  },
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={frauncesWoff} />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href={manropeWoff} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{siteTitle}</title>
+    <meta name="description" content={siteDescription} />
+    <link rel="canonical" href={new URL("/nuclear-in-philippines/", Astro.site).href} />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={siteDescription} />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Why Nuclear" />
+    <meta property="og:url" content={new URL("/nuclear-in-philippines/", Astro.site).href} />
+    <meta property="og:image" content={new URL("/og-philippines.jpg", Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta
+      property="og:image:alt"
+      content="The mothballed Bataan Nuclear Power Plant in the Philippines, with the headline: Nuclear in the Philippines"
+    />
+    <script type="application/ld+json" set:html={articleJsonLd} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={siteDescription} />
+    <meta name="twitter:image" content={new URL("/og-philippines.jpg", Astro.site).href} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#faf6ef" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0e13" />
+    <script is:inline>
+      (function () {
+        try {
+          var theme = localStorage.getItem("theme");
+          if (theme !== "light" && theme !== "dark") {
+            theme = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          }
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="brand" href="/" aria-label="Why Nuclear, back to the article">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="6" fill="#ffc53d" />
+          <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(-30 32 32)" />
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(30 32 32)" />
+            <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(90 32 32)" />
+          </g>
+        </svg>
+        Why Nuclear
+      </a>
+      <input
+        type="checkbox"
+        id="nav-toggle"
+        class="nav-toggle"
+        role="switch"
+        aria-label="Toggle navigation menu"
+      />
+      <label for="nav-toggle" class="nav-burger" aria-hidden="true">
+        <svg class="burger-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <svg class="burger-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </label>
+      <nav aria-label="Primary" class="nav-panel">
+        <!-- This deep-dive has its own menu: the article's sections, not the
+             main site's section links. The hero's "Back to the article" link
+             and the footer handle getting back to the main site. -->
+        <ul class="nav-links">
+          <li><a href="#question">Question</a></li>
+          <li><a href="#geology">Geology</a></li>
+          <li><a href="#chernobyl-fukushima">Accidents</a></li>
+          <li><a href="#constitution">Constitution</a></li>
+          <li><a href="#waste">Waste</a></li>
+          <li><a href="#risk-perception">Risk</a></li>
+          <li><a href="#policy">Policy</a></li>
+          <li><a href="#real-question">Institutions</a></li>
+          <li><a href="#sources">Sources</a></li>
+        </ul>
+      </nav>
+      <button
+        id="theme-toggle"
+        class="theme-toggle"
+        type="button"
+        aria-pressed="false"
+        aria-label="Switch to light theme"
+      >
+        <Icon name="lucide:sun" class="ic ic-sun" aria-hidden="true" />
+        <Icon name="lucide:moon" class="ic ic-moon" aria-hidden="true" />
+      </button>
+    </header>
+
+    <main>
+      <!-- ============ HERO ============ -->
+      <section class="hero" id="top" aria-labelledby="ph-hero-title">
+        <Image
+          src={bataan}
+          alt="The mothballed Bataan Nuclear Power Plant containment dome in Morong, Philippines"
+          widths={heroWidths}
+          sizes="100vw"
+          fetchpriority="high"
+          loading="eager"
+          decoding="sync"
+          quality={75}
+          class="hero-bg"
+        />
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-content container">
+          <p class="hero-eyebrow">The Philippines, plainly</p>
+          <h1 id="ph-hero-title">
+            Nuclear in the <span class="accent">Philippines</span>
+          </h1>
+          <p>
+            "Why don't Filipinos like nuclear power?" is really three questions: what happened
+            before, what's true now, and whether the institutions could ever run a plant safely.
+            This page answers each one — with sources for every claim.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#question">Read the deep dive <Icon name="lucide:arrow-down" class="ic" aria-hidden="true" /></a>
+            <a class="btn btn-light" href="#sources">Jump to the sources <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a>
+          </div>
+
+          <div class="hero-stats" aria-label="Key figures">
+            <div class="hs-tile hs-wide">
+              <Icon name="lucide:coins" class="ic" aria-hidden="true" />
+              <span class="hs-num">$2.3B</span>
+              <span class="hs-label">cost of the never-fueled Bataan plant, built 1976–84</span>
+            </div>
+            <div class="hs-tile">
+              <Icon name="lucide:activity" class="ic" aria-hidden="true" />
+              <span class="hs-num">8 km</span>
+              <span class="hs-label">from Mount Natib, a potentially active volcano</span>
+            </div>
+            <div class="hs-tile">
+              <Icon name="lucide:heart-pulse" class="ic" aria-hidden="true" />
+              <span class="hs-num">28 · 0</span>
+              <span class="hs-label">Chernobyl ARS deaths · Fukushima radiation deaths</span>
+            </div>
+            <div class="hs-tile hs-wide">
+              <Icon name="lucide:calendar-clock" class="ic" aria-hidden="true" />
+              <span class="hs-num">2032</span>
+              <span class="hs-label">target year for nuclear in the Philippine energy mix</span>
+            </div>
+          </div>
+          <p class="hero-credit">
+            The mothballed Bataan Nuclear Power Plant, Morong, 2011 — photo: Jiru27, CC BY-SA 3.0.
+            Full record on the <a href="/credits/">credits page</a>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ============ STATS MARQUEE ============ -->
+      <section class="marquee" aria-label="Key statistics, scrolling band">
+        <div class="marquee-viewport">
+          <div class="marquee-track">
+            <div class="marquee-group">
+              <span class="marquee-item"><strong>$2.3B</strong> cost of the never-fueled Bataan plant</span>
+              <span class="marquee-item"><strong>8 km</strong> from Mount Natib</span>
+              <span class="marquee-item"><strong>28</strong> Chernobyl ARS deaths</span>
+              <span class="marquee-item"><strong>0</strong> Fukushima radiation deaths</span>
+              <span class="marquee-item"><strong>4,000+</strong> defects found at BNPP</span>
+              <span class="marquee-item"><strong>2032</strong> target year for nuclear in the mix</span>
+            </div>
+            <div class="marquee-group" aria-hidden="true">
+              <span class="marquee-item"><strong>$2.3B</strong> cost of the never-fueled Bataan plant</span>
+              <span class="marquee-item"><strong>8 km</strong> from Mount Natib</span>
+              <span class="marquee-item"><strong>28</strong> Chernobyl ARS deaths</span>
+              <span class="marquee-item"><strong>0</strong> Fukushima radiation deaths</span>
+              <span class="marquee-item"><strong>4,000+</strong> defects found at BNPP</span>
+              <span class="marquee-item"><strong>2032</strong> target year for nuclear in the mix</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="container ph-body">
+        <section id="question" aria-labelledby="question-title">
+          <div class="section-head">
+            <p class="section-num">01 · The question behind the question</p>
+            <h2 id="question-title">Bataan is the scar — and it's worse than "corruption and debt"</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:coins" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">$2.3B</span>
+                  <span class="stat-label">cost of the never-fueled Bataan plant, built 1976–84</span>
+                </div>
+              </div>
+              <p class="lead">
+                The Bataan Nuclear Power Plant was built between 1976 and 1984 under Ferdinand
+                Marcos: a 620&nbsp;MW Westinghouse reactor that cost roughly
+                <strong>US$2.3&nbsp;billion</strong> and was <strong>never fueled or operated</strong>
+                (<a href="https://en.wikipedia.org/wiki/Bataan_Nuclear_Power_Plant" rel="noopener noreferrer" target="_blank">Wikipedia</a>,
+                <a href="https://world-nuclear.org/information-library/country-profiles/countries-o-s/philippines" rel="noopener noreferrer" target="_blank">World Nuclear Association</a>).
+              </p>
+              <p>
+                Construction was paused in 1979 after Three Mile Island, and a review commission
+                found <strong>more than 4,000 defects</strong> in what had been built
+                (<a href="http://large.stanford.edu/courses/2015/ph241/anderson-m1/" rel="noopener noreferrer" target="_blank">Stanford</a>).
+              </p>
+              <p>
+                After EDSA, the political decision was to mothball it — but the debt stayed on the
+                government's books. For most Filipinos, "nuclear power" is this one building.
+              </p>
+            </div>
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={tmi}
+                  alt="The Three Mile Island nuclear station in Pennsylvania, where the 1979 accident paused Bataan's construction"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  Three Mile Island, 1979 — the accident that paused Bataan's construction. Zero
+                  deaths, and the containment worked as designed.
+                  <span class="photo-credit">Photo: U.S. DOE (public domain)</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section id="geology" aria-labelledby="geology-title">
+          <div class="section-head">
+            <p class="section-num">02 · The site's geology</p>
+            <h2 id="geology-title">The strongest objection isn't fear — it's the ground under the plant</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:activity" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">8 km</span>
+                  <span class="stat-label">from Mount Natib, a potentially active volcano</span>
+                </div>
+              </div>
+              <p class="lead">
+                BNPP sits about eight kilometers from <strong>Mount Natib, a potentially active
+                volcano</strong>, and geological studies say the plant likely stands on or near
+                active faulting, with pyroclastic deposits and lahars underlying the site
+                (<a href="https://inis.iaea.org/records/1cz97-ta284" rel="noopener noreferrer" target="_blank">Solidum, IAEA</a>;
+                <a href="https://newsinfo.inquirer.net/982036/safety-issues-hound-bnpp-revival-plan" rel="noopener noreferrer" target="_blank">Philippine Daily Inquirer, 2018</a>).
+              </p>
+              <p>
+                So "what if an earthquake hits it?" is not paranoia about nuclear in general — it's a
+                documented objection to <em>that site</em>. It argues for better site selection, not
+                for banning the technology. But it is a legitimate, peer-reviewed reason people
+                distrust any Philippine nuclear project.
+              </p>
+            </div>
+            <div class="arg-media">
+              <div class="ph-card">
+                <h3>What the site faces</h3>
+                <ul>
+                  <li><strong>Mount Natib</strong> — ~8 km away, a potentially active volcano</li>
+                  <li><strong>Active faulting</strong> — the plant likely stands on or near it</li>
+                  <li><strong>Pyroclastic deposits &amp; lahars</strong> — volcanic debris underlying the site</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="chernobyl-fukushima" aria-labelledby="chernobyl-fukushima-title">
+          <div class="section-head">
+            <p class="section-num">03 · Chernobyl and Fukushima</p>
+            <h2 id="chernobyl-fukushima-title">The memories are real — the numbers are smaller than the pictures</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:heart-pulse" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">28 · 0</span>
+                  <span class="stat-label">Chernobyl ARS deaths · Fukushima radiation deaths</span>
+                </div>
+              </div>
+              <p class="lead">
+                At Chernobyl, of 600 workers on site during the accident, 134 developed acute
+                radiation sickness and <strong>28 died of it</strong>; 19 more survivors had died by
+                2006 (<a href="https://www.unscear.org/unscear/en/chernobyl.html" rel="noopener noreferrer" target="_blank">UNSCEAR</a>,
+                <a href="https://ourworldindata.org/what-was-the-death-toll-from-chernobyl-and-fukushima" rel="noopener noreferrer" target="_blank">Our World in Data</a>).
+              </p>
+              <p>
+                At Fukushima, <strong>no deaths or radiation sickness</strong> have been documented,
+                and the UN found no adverse health effects among residents directly attributable to
+                radiation (<a href="https://www.unscear.org/unscear/en/areas-of-work/fukushima-report-faq.html" rel="noopener noreferrer" target="_blank">UNSCEAR 2020/2021</a>,
+                <a href="https://world-nuclear.org/information-library/safety-and-security/safety-of-plants/fukushima-daiichi-accident" rel="noopener noreferrer" target="_blank">World Nuclear Association</a>).
+              </p>
+              <p>
+                The honest caveat: <strong>more than 100,000 people were evacuated</strong>, and
+                displacement itself carried real health and social costs
+                (<a href="https://thebulletin.org/2026/03/counting-the-dead-at-fukushima/" rel="noopener noreferrer" target="_blank">Bulletin of the Atomic Scientists</a>).
+                Fear is a rational response to the pictures; the statistics are what a real debate
+                would weigh.
+              </p>
+            </div>
+            <div class="arg-media">
+              <div class="ph-card">
+                <h3>Two accidents, by the numbers</h3>
+                <ul>
+                  <li><strong>Chernobyl</strong> — 134 sickened with acute radiation sickness; <strong>28</strong> died of it</li>
+                  <li><strong>Fukushima</strong> — <strong>0</strong> deaths or radiation sickness documented</li>
+                </ul>
+                <p class="ph-card-note">
+                  The honest caveat: 100,000+ people were evacuated — displacement carried real
+                  health and social costs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="constitution" aria-labelledby="constitution-title">
+          <div class="section-head">
+            <p class="section-num">04 · The constitution</p>
+            <h2 id="constitution-title">The 1987 Constitution never banned nuclear energy</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:book-open" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">Art. II §8</span>
+                  <span class="stat-label">a nuclear-weapons policy, not an energy ban</span>
+                </div>
+              </div>
+              <p class="lead">
+                Article II, Section 8 of the 1987 Constitution commits the Philippines to
+                <strong>"freedom from nuclear weapons"</strong> — a weapons policy, not an energy ban
+                (<a href="https://www.officialgazette.gov.ph/constitutions/1987-constitution/" rel="noopener noreferrer" target="_blank">Official Gazette</a>).
+              </p>
+              <p>
+                Opposition to BNPP was organized and political (the Nuclear Free Philippines
+                Coalition, founded 1981), but nothing in Philippine law prohibited civilian nuclear
+                power. The obstacle was history, trust, and economics — not the constitution.
+              </p>
+            </div>
+            <div class="arg-media">
+              <div class="ph-card">
+                <h3>What Article II, Section 8 actually says</h3>
+                <blockquote class="ph-quote">
+                  "The State shall pursue a policy of freedom from nuclear weapons in its
+                  territory."
+                  <cite class="ph-quote-cite">— 1987 Constitution, Republic of the Philippines</cite>
+                </blockquote>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="waste" aria-labelledby="waste-title">
+          <div class="section-head">
+            <p class="section-num">05 · Waste</p>
+            <h2 id="waste-title">Waste is a management problem, not a volume problem</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:recycle" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">tiny</span>
+                  <span class="stat-label">a plant's spent fuel — concentrated, sealed, and monitored</span>
+                </div>
+              </div>
+              <p class="lead">
+                Nuclear waste is dangerous precisely because it is concentrated: a plant's spent
+                fuel fits in a small volume, stored in engineered casks, with the hard part being
+                time and institutions
+                (<a href="https://www.nrc.gov/reading-rm/basic-ref/students/for-educators/students/radioactive-waste.html" rel="noopener noreferrer" target="_blank">U.S. NRC</a>).
+              </p>
+              <p>
+                Fossil waste is the opposite — massive and dispersed into the air as CO₂,
+                particulates, and sulfur compounds. Neither is a zero-impact energy source.
+              </p>
+            </div>
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={pelletHand}
+                  alt="A gloved hand holding a uranium fuel pellet next to a fuel rod"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  A fuel pellet the size of a gummy bear — the entire spent-fuel story, in one hand.
+                  <span class="photo-credit">Photo: U.S. DOE (public domain)</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section id="risk-perception" aria-labelledby="risk-perception-title">
+          <div class="section-head">
+            <p class="section-num">06 · Risk perception</p>
+            <h2 id="risk-perception-title">Rare but catastrophic feels more dangerous than chronic but certain</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:gauge" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">0.03 vs 24</span>
+                  <span class="stat-label">deaths per TWh — nuclear vs coal</span>
+                </div>
+              </div>
+              <p class="lead">
+                People weigh catastrophic-but-rare outcomes more heavily than frequent-but-boring
+                ones — which is why "0.03 deaths per TWh for nuclear" feels abstract next to images
+                of contaminated ground, even though coal sits around 24 deaths per TWh
+                (<a href="https://ourworldindata.org/grapher/death-rates-from-energy-production-per-twh" rel="noopener noreferrer" target="_blank">Our World in Data</a>).
+              </p>
+              <p>That asymmetry is psychology, not misinformation.</p>
+            </div>
+            <div class="arg-media">
+              <div class="chart" aria-label="Deaths per terawatt-hour: coal 24.6, oil 18.4, nuclear 0.03">
+                <h3>Deaths per terawatt-hour</h3>
+                <div class="chart-row">
+                  <span class="chart-label">Coal</span>
+                  <div class="chart-track"><span class="chart-bar w-coal"></span></div>
+                  <span class="chart-value">24.6</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Oil</span>
+                  <div class="chart-track"><span class="chart-bar w-oil"></span></div>
+                  <span class="chart-value">18.4</span>
+                </div>
+                <div class="chart-row">
+                  <span class="chart-label">Nuclear</span>
+                  <div class="chart-track"><span class="chart-bar chart-bar--hl bar-tiny w-nuclear"></span></div>
+                  <span class="chart-value">0.03</span>
+                </div>
+                <p class="chart-note">
+                  Amber marks nuclear. The rare catastrophe feels enormous; the chronic toll
+                  doesn't — which is the whole point of this section.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="policy" aria-labelledby="policy-title">
+          <div class="section-head">
+            <p class="section-num">07 · The policy has already turned</p>
+            <h2 id="policy-title">The debate the article said "the Philippines needs" is already happening</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:calendar-clock" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">2022 → 2032</span>
+                  <span class="stat-label">from executive order to the nuclear target year</span>
+                </div>
+              </div>
+              <p class="lead">
+                In February 2022 the president signed an executive order putting nuclear into the
+                energy mix
+                (<a href="https://www.reuters.com/business/energy/duterte-approves-inclusion-nuclear-power-philippine-energy-mix-2022-03-03/" rel="noopener noreferrer" target="_blank">Reuters</a>).
+              </p>
+              <p>
+                In November 2023 the Philippines signed the U.S.&nbsp;123 civil-nuclear cooperation
+                agreement, in force since July 2024
+                (<a href="https://2021-2025.state.gov/u-s-philippines-civil-nuclear-cooperation-agreement-enters-into-force/" rel="noopener noreferrer" target="_blank">U.S. Department of State</a>).
+              </p>
+              <p>
+                And the IAEA has run two Integrated Nuclear Infrastructure Review missions — the
+                agency's official readiness check — most recently in December 2024
+                (<a href="https://www.iaea.org/newscenter/pressreleases/iaea-reviews-progress-of-the-philippines-nuclear-infrastructure-development" rel="noopener noreferrer" target="_blank">IAEA</a>).
+                The government targets nuclear in the mix by 2032.
+              </p>
+            </div>
+            <div class="arg-media">
+              <div class="ph-card">
+                <h3>The policy shift</h3>
+                <ul>
+                  <li><strong>2022</strong> — executive order puts nuclear in the energy mix</li>
+                  <li><strong>2023</strong> — U.S.–Philippines 123 agreement signed</li>
+                  <li><strong>2024</strong> — agreement in force; second IAEA readiness review</li>
+                  <li><strong>2032</strong> — target year for nuclear in the mix</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="real-question" aria-labelledby="real-question-title">
+          <div class="section-head">
+            <p class="section-num">08 · The real question</p>
+            <h2 id="real-question-title">Institutions, not reactors</h2>
+          </div>
+          <div class="arg">
+            <div class="arg-copy">
+              <div class="stat">
+                <Icon name="lucide:flask-conical" class="ic" aria-hidden="true" />
+                <div class="stat-body">
+                  <span class="stat-num">Milestones</span>
+                  <span class="stat-label">the IAEA framework: regulation, operators, waste, security, reporting</span>
+                </div>
+              </div>
+              <p class="lead">
+                A modern reactor can have extraordinary safety engineering. But corrupt procurement,
+                weak regulation, political interference, or incompetent operators create an entirely
+                different risk. Conversely, countries with strong regulation and independent
+                oversight run nuclear safely.
+              </p>
+              <p>
+                That is precisely why the official framework — the
+                <a href="https://www.iaea.org/services/review-missions/integrated-nuclear-infrastructure-review-inir" rel="noopener noreferrer" target="_blank">IAEA Milestones approach</a>
+                — is about institutions: regulation, operators, waste management, security, and
+                transparent reporting, not reactor sales. Trust in institutions may be the biggest
+                nuclear-energy problem the Philippines has — not the reactor itself.
+              </p>
+              <p class="ph-close">
+                None of this means the Philippines must build a plant. It means the honest question —
+                the one a national conversation should actually debate — is whether the country can
+                run one safely for sixty years. That's a question about governance, and it deserves
+                evidence, not slogans.
+              </p>
+            </div>
+            <div class="arg-media">
+              <figure class="photo">
+                <Image
+                  src={controlRoom}
+                  alt="Operators at the instrument panels of a nuclear plant control room"
+                  widths={colWidths}
+                  {...img}
+                />
+                <figcaption>
+                  A plant is run by trained operators and regulated institutions — the real question
+                  for the Philippines isn't the reactor, it's who runs it.
+                  <span class="photo-credit">Photo: U.S. NRC (public domain)</span>
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section class="sources" id="sources" aria-labelledby="ph-sources-title">
+          <h2 id="ph-sources-title">Sources & further reading</h2>
+          <ul>
+            <li><a href="https://en.wikipedia.org/wiki/Bataan_Nuclear_Power_Plant" rel="noopener noreferrer" target="_blank">Wikipedia — Bataan Nuclear Power Plant <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://world-nuclear.org/information-library/country-profiles/countries-o-s/philippines" rel="noopener noreferrer" target="_blank">World Nuclear Association — Nuclear Power in the Philippines <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="http://large.stanford.edu/courses/2015/ph241/anderson-m1/" rel="noopener noreferrer" target="_blank">Stanford — Bataan Philippine Reactor: 30 Years Unfueled <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://inis.iaea.org/records/1cz97-ta284" rel="noopener noreferrer" target="_blank">Solidum — Earthquake and volcanic risks: issues for the BNPP (IAEA) <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://newsinfo.inquirer.net/982036/safety-issues-hound-bnpp-revival-plan" rel="noopener noreferrer" target="_blank">Philippine Daily Inquirer — Safety issues hound BNPP revival plan <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://www.unscear.org/unscear/en/chernobyl.html" rel="noopener noreferrer" target="_blank">UNSCEAR — The Chornobyl Accident <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://www.unscear.org/unscear/en/areas-of-work/fukushima-report-faq.html" rel="noopener noreferrer" target="_blank">UNSCEAR — 2020/2021 Fukushima Report FAQ <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://ourworldindata.org/what-was-the-death-toll-from-chernobyl-and-fukushima" rel="noopener noreferrer" target="_blank">Our World in Data — What was the death toll from Chernobyl and Fukushima? <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://thebulletin.org/2026/03/counting-the-dead-at-fukushima/" rel="noopener noreferrer" target="_blank">Bulletin of the Atomic Scientists — Counting the dead at Fukushima <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://world-nuclear.org/information-library/safety-and-security/safety-of-plants/fukushima-daiichi-accident" rel="noopener noreferrer" target="_blank">World Nuclear Association — Fukushima Daiichi Accident <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://www.officialgazette.gov.ph/constitutions/1987-constitution/" rel="noopener noreferrer" target="_blank">Official Gazette — 1987 Constitution of the Philippines <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://www.reuters.com/business/energy/duterte-approves-inclusion-nuclear-power-philippine-energy-mix-2022-03-03/" rel="noopener noreferrer" target="_blank">Reuters — Duterte approves inclusion of nuclear power in the energy mix <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://2021-2025.state.gov/u-s-philippines-civil-nuclear-cooperation-agreement-enters-into-force/" rel="noopener noreferrer" target="_blank">U.S. Department of State — U.S.–Philippines Civil Nuclear Cooperation Agreement enters into force <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://www.iaea.org/newscenter/pressreleases/iaea-reviews-progress-of-the-philippines-nuclear-infrastructure-development" rel="noopener noreferrer" target="_blank">IAEA — Reviews progress of the Philippines' nuclear infrastructure development <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+            <li><a href="https://ourworldindata.org/grapher/death-rates-from-energy-production-per-twh" rel="noopener noreferrer" target="_blank">Our World in Data — Death rates from energy production per TWh <Icon name="lucide:arrow-up-right" class="ic" aria-hidden="true" /></a></li>
+          </ul>
+
+          <h2 class="credits-title">Image credits</h2>
+          <div class="credits">
+            <p>
+              All photos are freely licensed for reuse with attribution. Full details, file pages,
+              and license links: <a href="/credits/">photo credits page</a>.
+            </p>
+            <ul>
+              <li>Hero: Bataan NPP · Jiru27, CC BY-SA 3.0</li>
+              <li>Three Mile Island: U.S. DOE, public domain</li>
+              <li>Fuel pellet in hand: U.S. DOE, public domain</li>
+              <li>Control room: U.S. NRC, public domain</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ============ BACK TO THE MAIN ARTICLE ============ -->
+        <section class="ph-teaser" aria-labelledby="back-article-title">
+          <div class="ph-teaser-card">
+            <div class="ph-teaser-body">
+              <p class="section-num">Back to the main article</p>
+              <h2 id="back-article-title">Nuclear is the cleanest, safest, most reliable energy we already know how to build</h2>
+              <p>
+                The full argument, from the top — every number linked to its primary
+                source, honest about its limits. A five-minute read.
+              </p>
+            </div>
+            <a class="btn btn-primary" href="/">Read the main article <Icon name="lucide:arrow-left" class="ic" aria-hidden="true" /></a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="/" aria-label="Why Nuclear, back to the article">
+              <svg viewBox="0 0 64 64" aria-hidden="true">
+                <circle cx="32" cy="32" r="6" fill="#ffc53d" />
+                <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(-30 32 32)" />
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(30 32 32)" />
+                  <ellipse cx="32" cy="32" rx="27" ry="10" transform="rotate(90 32 32)" />
+                </g>
+              </svg>
+              Why Nuclear
+            </a>
+            <p>The evidence, plainly. Every number on the article links to its primary source — check them, then decide.</p>
+          </div>
+          <nav class="footer-col" aria-label="The argument">
+            <h2>The argument</h2>
+            <ul>
+              <li><a href="#question">Question</a></li>
+              <li><a href="#geology">Geology</a></li>
+              <li><a href="#chernobyl-fukushima">Accidents</a></li>
+              <li><a href="#constitution">Constitution</a></li>
+              <li><a href="#waste">Waste</a></li>
+              <li><a href="#risk-perception">Risk</a></li>
+              <li><a href="#policy">Policy</a></li>
+              <li><a href="#real-question">Institutions</a></li>
+              <li><a href="#sources">Sources</a></li>
+            </ul>
+          </nav>
+          <nav class="footer-col" aria-label="Resources">
+            <h2>Resources</h2>
+            <ul>
+              <li><a href="/#sources">Sources & further reading</a></li>
+              <li><a class="active" href="/nuclear-in-philippines/" aria-current="page">Why do so many Filipinos distrust nuclear power?</a></li>
+              <li><a href="/credits/">Photo credits</a></li>
+              <li><a href="#top">Back to top</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} Why Nuclear</span>
+          <span>All photos are freely licensed for reuse with attribution.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Theme toggle: flip data-theme and remember the choice (same as the
+      // other pages; the <head> script resolved the initial theme).
+      var themeToggle = document.getElementById("theme-toggle");
+      if (themeToggle) {
+        var syncToggle = function (theme) {
+          themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+          themeToggle.setAttribute(
+            "aria-label",
+            theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+          );
+        };
+        var applyTheme = function (theme, persist) {
+          document.documentElement.setAttribute("data-theme", theme);
+          if (persist) {
+            try {
+              localStorage.setItem("theme", theme);
+            } catch (e) {}
+          }
+          syncToggle(theme);
+        };
+        syncToggle(document.documentElement.getAttribute("data-theme") || "dark");
+        themeToggle.addEventListener("click", function () {
+          var current = document.documentElement.getAttribute("data-theme");
+          applyTheme(current === "dark" ? "light" : "dark", true);
+        });
+      }
+
+      // Mobile menu: close when a link is chosen or Escape is pressed.
+      var navToggle = document.getElementById("nav-toggle");
+      if (navToggle) {
+        document.querySelectorAll(".nav-panel a").forEach(function (a) {
+          a.addEventListener("click", function () {
+            navToggle.checked = false;
+          });
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") navToggle.checked = false;
+        });
+      }
+
+      // Scrollspy: highlight the nav link for the deep-dive section in view
+      // and mirror it into the URL hash (replaceState — no history spam, no
+      // scroll jump; the hero clears the hash). Same behavior as the main
+      // article. Without JS the page simply skips the highlight.
+      if ("IntersectionObserver" in window) {
+        var links = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
+        var ids = links.map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        // NB: the variable must NOT be named `top` — at global scope that
+        // collides with the built-in window.top (the topmost window), the
+        // assignment silently fails, and observe() throws.
+        var hero = document.getElementById("top");
+        if (hero) sections.push(hero);
+        var setActive = function (id) {
+          links.forEach(function (l) {
+            l.classList.toggle("active", l.getAttribute("href") === "#" + id);
+          });
+        };
+        var setHash = function (id) {
+          try {
+            if (id === "top") {
+              if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+            } else if (location.hash !== "#" + id) {
+              history.replaceState(null, "", "#" + id);
+            }
+          } catch (e) {}
+        };
+        var spy = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) {
+                setActive(e.target.id);
+                setHash(e.target.id);
+              }
+            });
+          },
+          { rootMargin: "-40% 0px -55% 0px" }
+        );
+        sections.forEach(function (s) {
+          spy.observe(s);
+        });
+
+        // Deep links: light up the target nav link immediately, before the
+        // observer's first callbacks (which fire while the browser's own
+        // fragment scroll is still settling). Adopt on hashchange too, and on
+        // any nav-link click.
+        var adoptFromHash = function () {
+          var id = location.hash.slice(1);
+          if (id && sections.indexOf(document.getElementById(id)) !== -1) {
+            setActive(id);
+          }
+        };
+        adoptFromHash();
+        window.addEventListener("hashchange", adoptFromHash);
+        document.querySelectorAll(".nav-links a, .nav-panel a").forEach(function (a) {
+          a.addEventListener("click", adoptFromHash);
+        });
+
+        // Belt-and-suspenders for the very top of the page: the observer
+        // tracks the hero like every other section, and a passive scroll
+        // listener guarantees the hash clears deterministically at scrollY 0.
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (window.scrollY <= 1) {
+              setActive("top");
+              setHash("top");
+            }
+          },
+          { passive: true }
+        );
+
+        // Back-to-top links (brand, footer) must never put "#top" in the
+        // URL: intercept the click, smooth-scroll instead, and clear any
+        // hash already present.
+        document.addEventListener("click", function (e) {
+          var a = e.target.closest ? e.target.closest('a[href="#top"]') : null;
+          if (a) {
+            e.preventDefault();
+            setActive("top");
+            setHash("top");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+
+        // Landing on /#top (a shared link) should settle to a clean URL once
+        // the browser's own fragment scroll has finished.
+        window.addEventListener("load", function () {
+          if (location.hash === "#top") {
+            setActive("top");
+            setHash("top");
+            return;
+          }
+          // Adopt whichever section the browser actually landed on: covers
+          // scroll-restored reloads and any fragment scroll still finishing
+          // when the observer's first callbacks ran.
+          var bandTop = window.innerHeight * 0.4;
+          var bandBottom = window.innerHeight * 0.45;
+          var best = null;
+          sections.forEach(function (s) {
+            var r = s.getBoundingClientRect();
+            if (r.top <= bandBottom && r.bottom >= bandTop && (!best || r.top < best.top)) {
+              best = { el: s, top: r.top };
+            }
+          });
+          if (best) {
+            setActive(best.el.id);
+            setHash(best.el.id);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .ph-body {
+    padding: clamp(3rem, 6vw, 4.5rem) 0 clamp(2rem, 5vw, 3rem);
+  }
+
+  .ph-close {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted) !important;
+  }
+
+  /* Media-column cards for sections without a fitting photo (geology,
+     accidents, constitution, policy): same card token as .stat / .myth-card. */
+  .ph-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+  }
+
+  .ph-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 620;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+  }
+
+  .ph-card ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.95rem;
+  }
+
+  .ph-card li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: baseline;
+    color: var(--arg-text);
+    line-height: 1.5;
+  }
+
+  .ph-card li::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+    transform: translateY(-1px);
+  }
+
+  .ph-card strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .ph-card-note {
+    margin: 1rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .ph-card .ph-quote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1.45;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  .ph-quote-cite {
+    display: block;
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-style: normal;
+    color: var(--muted);
+  }
+
+  .ph-body .sources {
+    padding: clamp(2rem, 5vw, 3rem) 0 0;
+  }
+</style>
