@@ -167,7 +167,7 @@ const webPageJsonLd = JSON.stringify({
   </head>
   <body>
     <header class="nav">
-      <a class="brand" href="/" aria-label="Why Nuclear, back to the article">
+      <a class="brand" href="/" aria-label="Why Nuclear, to the article">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <circle cx="32" cy="32" r="6" fill="#ffc53d" />
           <g fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.9">
@@ -178,6 +178,27 @@ const webPageJsonLd = JSON.stringify({
         </svg>
         Why Nuclear
       </a>
+      <input
+        type="checkbox"
+        id="nav-toggle"
+        class="nav-toggle"
+        role="switch"
+        aria-label="Toggle navigation menu"
+      />
+      <label for="nav-toggle" class="nav-burger" aria-hidden="true">
+        <svg class="burger-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <svg class="burger-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </label>
+      <nav aria-label="Primary" class="nav-panel">
+        <ul class="nav-links">
+          <li><a href="/">The article</a></li>
+          <li><a href="/nuclear-in-philippines/">Philippines</a></li>
+        </ul>
+      </nav>
       <button
         id="theme-toggle"
         class="theme-toggle"
@@ -192,10 +213,6 @@ const webPageJsonLd = JSON.stringify({
 
     <main class="credit-main" id="top">
       <div class="container">
-        <a class="credit-back" href="/">
-          <Icon name="lucide:arrow-left" class="ic" aria-hidden="true" />
-          Back to the article
-        </a>
         <p class="section-num">Attribution</p>
         <h1>Photo credits &amp; licenses</h1>
         <p class="credit-intro">
@@ -275,7 +292,6 @@ const webPageJsonLd = JSON.stringify({
             <ul>
               <li><a href="/#sources">Sources & further reading</a></li>
               <li><a href="/nuclear-in-philippines/">Why do so many Filipinos distrust nuclear power?</a></li>
-              <li><a class="active" href="/credits/" aria-current="page">Photo credits</a></li>
               <li><a href="#top">Back to top</a></li>
             </ul>
           </nav>
