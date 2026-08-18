@@ -40,35 +40,49 @@ const out = path.join(root, "public", "og-image.jpg");
 
 // ---- Find a Chrome/Chromium binary -----------------------------------------
 // Puppeteer's browser cache (what `npx browsers install chrome@stable` writes on
-// CI/Vercel): ~/.cache/puppeteer/chrome/<buildId>/chrome-linux64/chrome, plus the
-// macOS/Windows equivalents.
-const cacheChrome = () => {
-  try {
-    const base = path.join(os.homedir(), ".cache", "puppeteer", "chrome");
-    if (!existsSync(base)) return null;
-    const targets = [
-      ["chrome-linux64", "chrome"],
-      ["chrome-mac-arm64", "Google Chrome for Testing.app", "Contents", "MacOS", "Google Chrome for Testing"],
-      ["chrome-mac-x64", "Google Chrome for Testing.app", "Contents", "MacOS", "Google Chrome for Testing"],
-      ["chrome-win64", "chrome.exe"],
-      ["chrome-headless-shell-linux64", "chrome-headless-shell"],
-    ];
-    for (const buildDir of readdirSync(base)) {
-      for (const t of targets) {
-        const p = path.join(base, buildDir, ...t);
-        if (existsSync(p)) return p;
+// CI/Vercel): ~/.cache/puppeteer/chrome/<buildId>/<platform>/chrome. On Vercel
+// the install lands in the project dir instead (<root>/chrome/<buildId>/...),
+// and PUPPETEER_CACHE_DIR may point at the cache root. Search all of them, in
+// both the `chrome/<buildId>/...` and `<buildId>/...` layouts.
+const chromeCandidates = () => {
+  const bases = [
+    process.env.PUPPETEER_CACHE_DIR,
+    path.join(os.homedir(), ".cache", "puppeteer"),
+    path.join(root, ".cache", "puppeteer"),
+    path.join(root, "chrome"),
+  ].filter(Boolean);
+  const targets = [
+    ["chrome-linux64", "chrome"],
+    ["chrome-headless-shell-linux64", "chrome-headless-shell"],
+    ["chrome-mac-arm64", "Google Chrome for Testing.app", "Contents", "MacOS", "Google Chrome for Testing"],
+    ["chrome-mac-x64", "Google Chrome for Testing.app", "Contents", "MacOS", "Google Chrome for Testing"],
+    ["chrome-win64", "chrome.exe"],
+  ];
+  const found = [];
+  for (const base of bases) {
+    for (const sub of ["chrome", ""]) {
+      const dir = sub ? path.join(base, sub) : base;
+      let buildDirs;
+      try {
+        buildDirs = readdirSync(dir);
+      } catch {
+        continue; /* dir missing — try the next base */
+      }
+      for (const buildDir of buildDirs) {
+        for (const t of targets) {
+          const p = path.join(dir, buildDir, ...t);
+          if (existsSync(p)) found.push(p);
+        }
       }
     }
-  } catch {
-    /* cache unreadable — fall through to the other candidates */
   }
-  return null;
+  return found;
 };
 
 const candidates = [
   process.env.CHROME_PATH,
   process.env.PUPPETEER_EXECUTABLE_PATH,
-  cacheChrome(),
+  ...chromeCandidates(),
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
   "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
