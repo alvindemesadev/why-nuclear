@@ -5,14 +5,16 @@ import icon from 'astro-icon';
 
 // Deployment URL resolution, in order of precedence:
 //   1. SITE_URL                      — explicit override (custom domain, any host)
-//   2. VERCEL_URL                    — set automatically on every Vercel deploy
+//   2. VERCEL_URL                    — set automatically on every Vercel deploy; it
+//                                      carries no scheme, so prefix https://
 //   3. fallback                      — the assumed Vercel project URL for local builds
 // https://astro.build/config
+const vercelUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL.replace(/^https?:\/\//, '')}`
+  : null;
+
 export default defineConfig({
-  site:
-    process.env.SITE_URL ??
-    process.env.VERCEL_URL ??
-    'https://why-nuclear.vercel.app',
+  site: process.env.SITE_URL ?? vercelUrl ?? 'https://why-nuclear.vercel.app',
   build: {
     // Single page, ~8KB of CSS: inline it to remove a render-blocking request.
     inlineStylesheets: 'always',
