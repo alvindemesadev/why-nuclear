@@ -12,7 +12,7 @@
     "verify:og": "node scripts/verify-og-images.mjs",
     "build": "npm run verify:credits && npm run generate:og && astro build && npm run verify:og",
     "preview": "astro preview",
-    "vercel-build": "npx browsers install chrome@stable && npm run build",
+    "vercel-build": "npm run build",
     "astro": "astro"
   },
   "dependencies": {

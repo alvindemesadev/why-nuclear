@@ -38,6 +38,19 @@ const cardPhoto = async (rel) => {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, "public", "og-image.jpg");
 
+// The three share cards are committed to the repo, so a fresh checkout (e.g.
+// Vercel, where Chrome's system libraries aren't installed) doesn't need to
+// re-render them. Skip unless an image is missing or --force is passed.
+const ogOutputs = [
+  out,
+  path.join(root, "public", "og-credits.jpg"),
+  path.join(root, "public", "og-philippines.jpg"),
+];
+if (!process.argv.includes("--force") && ogOutputs.every((f) => existsSync(f))) {
+  console.log("✓ og:image(s) already present — skipping (use --force to regenerate)");
+  process.exit(0);
+}
+
 // ---- Find a Chrome/Chromium binary -----------------------------------------
 // Puppeteer's browser cache (what `npx browsers install chrome@stable` writes on
 // CI/Vercel): ~/.cache/puppeteer/chrome/<buildId>/<platform>/chrome. On Vercel

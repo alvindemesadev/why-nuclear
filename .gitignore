@@ -2,8 +2,6 @@
 dist/
 # generated types
 .astro/
-# generated at build time by scripts/generate-og-image.mjs
-/public/og-image.jpg
 
 # dependencies
 node_modules/

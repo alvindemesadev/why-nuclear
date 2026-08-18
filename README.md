@@ -29,8 +29,10 @@ optimized through Astro's asset pipeline.
 - **`scripts/verify-credits.mjs`** — build-time license/image verification
 - **`scripts/verify-og-images.mjs`** — checks every `og:image` referenced in the built HTML
   exists in `dist/` as a real JPEG/PNG, so a missing share image fails the build
-- **`scripts/generate-og-image.mjs`** — renders the 1200×630 social-share card from the
-  hero photo with brand fonts (headless Chrome), wired into `og:image` / Twitter cards
+- **`scripts/generate-og-image.mjs`** — renders the 1200×630 social-share cards from the
+  site photos with brand fonts (headless Chrome), wired into `og:image` / Twitter cards. The
+  three cards are committed to the repo, so the build skips rendering when they're already
+  present (pass `--force` to regenerate — needs Chrome; set `CHROME_PATH` if it isn't found)
 - **Dark and light themes** — a single token palette with warm paper light mode; the amber
   accent and chart bars stay identical in both. A sun/moon toggle in the nav overrides the
   OS preference and persists the choice in `localStorage` (a tiny `<head>` script sets
@@ -53,14 +55,15 @@ optimized through Astro's asset pipeline.
 | `npm run verify:og`    | Verify every `og:image` exists in `dist/` |
 | `npm run generate:og` | Regenerate `public/og-image.jpg` from the hero photo |
 | `npm run build`       | Verify credits + share images, generate og:images, then build to `dist/` |
-| `npm run vercel-build`| Vercel's build: install headless Chrome, then run the full build chain |
+| `npm run vercel-build`| Vercel's build: run the full build chain (no Chrome needed — the share cards are committed) |
 | `npm run preview`     | Preview the production build                  |
 
 `npm run build` runs `scripts/verify-credits.mjs` (parses `public/CREDITS.md`, confirms
 every license still resolves on its Wikimedia file page, downloads any image missing locally;
 `--force` re-downloads everything; the build fails if a license or image goes stale),
 `scripts/generate-og-image.mjs` (renders the three 1200×630 share cards from the site photos
-with the Fraunces/mono branding; needs Chrome — set `CHROME_PATH` if it isn't found), then
+with the Fraunces/mono branding; the cards are committed, so it skips when they're present —
+pass `--force` to re-render; needs Chrome, set `CHROME_PATH` if it isn't found), then
 `scripts/verify-og-images.mjs` (scans `dist/` and fails the build if any `og:image` referenced
 in the HTML is missing or isn't a real JPEG/PNG).
 
@@ -162,19 +165,17 @@ the scrollspy snippet), so Vercel needs no adapter.
 
 1. Push this repo to a Git provider and **Import** it in Vercel. The framework is auto-detected
    (Astro), and [`vercel.json`](./vercel.json) pins `buildCommand: npm run vercel-build`.
-2. `vercel-build` installs a headless Chrome into the puppeteer cache
-   (`npx browsers install chrome@stable`) before running the normal build chain, because
-   `scripts/generate-og-image.mjs` renders the social card in headless Chrome. The generator
-   now also looks in `~/.cache/puppeteer` for that binary, so no `CHROME_PATH` is needed on
-   Vercel (it still works everywhere else). `puppeteer-core` and `@puppeteer/browsers` are
-   declared devDependencies so the pipeline is self-contained on a fresh install.
+2. `vercel-build` is just the normal build chain — it does **not** need Chrome, because the
+   three 1200×630 share cards are committed to the repo. `scripts/generate-og-image.mjs`
+   skips rendering when they're already present (pass `--force` to re-render). Chrome is
+   only needed locally, where `puppeteer-core`/`@puppeteer/browsers` (devDependencies) find
+   your system browser.
 3. **Site URL:** `astro.config.mjs` resolves `site` from `SITE_URL` → `VERCEL_URL` (set
    automatically on every deploy) → `https://why-nuclear.vercel.app` as the local fallback.
    The `og:image`/Twitter card URLs and the sitemap are built from this, so share cards point
    at the real deployment. Set `SITE_URL` in Vercel to your custom domain once you have one.
-4. The build requires network access (credit/license verification hits Wikimedia, and the
-   og:image generator downloads Chrome once, cached between builds) and Node >= 22.12
-   (`engines` in `package.json`).
+4. The build requires network access (credit/license verification hits Wikimedia) and
+   Node >= 22.12 (`engines` in `package.json`).
 
-Local `npm run build` behaves identically (no Chrome install — it finds your system
-Chrome/Chromium).
+Local `npm run build` behaves identically (no Chrome needed — the cards are already there;
+run `npm run generate:og -- --force` to re-render them).
